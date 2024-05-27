@@ -1,17 +1,24 @@
+import yaml
 import importlib
-from abc import ABC, abstractmethod
-from callback.callback import Callback
 from typing import List, Dict, Any
 
-import yaml
+from abc import ABC, abstractmethod
+from callback.callback import Callback
 
 
 class Pipeline(ABC):
     """
+    1、在Pipeline中，项目所有的模块必须继承自Pipeline以便统一的管理。
+    2、在项目流程图中承担项目主要功能的模块被称为主要模块。
+    3、用于主要模块的一些工具类、Hook、测试模块等非核心功能模块被称为次要模块。
+    4、Pipeline默认通过__call__方法来区分主次模块。主要模块必须实现__call__方法。
+    5、所有的模块都有run方法，run方法承担具体的执行功能，而__call__代表暴露模块接口和逻辑，可以接受调用或者调用其他模块。
+    6、主模块需要承担Pipeline的前后连接，所以必须暴露接口，但不是所有模块都希望将接口暴露给所有其他模块。（比如工具类），
+       未实现__call__方法的模块会在初始化时被隐藏，只被其约定的模块私有调用。而所有__call__方法会被统一收集、链接、执行。
     基类：
         __init__:可以被重写，选择手动创建Pipeline还是从文件中构建
         setup   :必须被重写，初始化项目的必须方法
-        run     :可以被重写，默认链式执行全部的核心子模块（带__call__。不带默认为工具类或非Pipeline主链路上的模块）
+        run     :可以被重写，默认顺序执行全部的核心模块（带__call__。不带默认为工具类或非Pipeline主链路上的模块）
         from_configfile:可以被重写，从文件构建出Pipeline的方法
         save_configfile:可以被重写，从Pipeline保存为文件的方法
         get_executable_modules:可以被重写，获取Pipeline上的主要模块（带__call__）
@@ -29,7 +36,7 @@ class Pipeline(ABC):
     def setup(self, **kwargs):
         raise NotImplementedError
 
-    def run(self, callbacks=None, **kwargs):
+    def run(self, callbacks: Callback = None, **kwargs):
         """
         :param callbacks:   需要被挂载的Callback列表
         :param kwargs:      参数适配
