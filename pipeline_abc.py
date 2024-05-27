@@ -23,14 +23,13 @@ class Pipeline(ABC):
     def from_configfile(self, config_file):
         with open(config_file, 'r') as file:
             loaded_config = yaml.safe_load(file)
-        self.config = self._deserialize_config(loaded_config['config'])
-        self.modules = [self._load_module_config(mod_config) for mod_config in loaded_config['modules']]
+            loaded_config = self._deserialize_config(loaded_config)
+        root_module = self._load_module_config(loaded_config)
+        self.config = root_module.config
+        self.modules = root_module.modules
 
     def save_configfile(self, config_file):
-        config_to_save = {
-            'config': self._serialize_config(self.config),
-            'modules': [self._get_module_config(module) for module in self.modules]
-        }
+        config_to_save = self._get_module_config(self)
         with open(config_file, 'w') as file:
             yaml.dump(config_to_save, file)
 
@@ -41,17 +40,18 @@ class Pipeline(ABC):
         return {
             'module_path': module.__module__,
             'class': module.__class__.__name__,
-            'config': self._serialize_config(module.config)
+            'config': self._serialize_config(module.config),
+            'modules': [self._get_module_config(sub_module) for sub_module in getattr(module, 'modules', [])]
         }
 
-    @staticmethod
-    def _load_module_config(mod_config):
+    def _load_module_config(self, mod_config):
         module_path = mod_config['module_path']
         module_class = mod_config['class']
         module = importlib.import_module(module_path)
         module_class = getattr(module, module_class)
         module_instance = module_class()
         module_instance.config = mod_config['config']
+        module_instance.modules = [self._load_module_config(sub_module) for sub_module in mod_config.get('modules', [])]
         return module_instance
 
     @staticmethod
