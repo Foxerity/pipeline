@@ -16,12 +16,12 @@ class Pipeline(ABC):
     6、主模块需要承担Pipeline的前后连接，所以必须暴露接口，但不是所有模块都希望将接口暴露给所有其他模块。（比如工具类），
        未实现__call__方法的模块会在初始化时被隐藏，只被其约定的模块私有调用。而所有__call__方法会被统一收集、链接、执行。
     基类：
-        __init__:可以被重写，选择手动创建Pipeline还是从文件中构建
-        setup   :必须被重写，初始化项目的必须方法
-        run     :可以被重写，默认顺序执行全部的核心模块（带__call__。不带默认为工具类或非Pipeline主链路上的模块）
-        from_configfile:可以被重写，从文件构建出Pipeline的方法
-        save_configfile:可以被重写，从Pipeline保存为文件的方法
-        get_executable_modules:可以被重写，获取Pipeline上的主要模块（带__call__）
+        def __init__:可以被重写，选择手动创建Pipeline还是从文件中构建
+        def setup   :必须被重写，初始化项目的必须方法
+        def run     :可以被重写，默认顺序执行全部的核心模块（带__call__。不带默认为工具类或非Pipeline主链路上的模块）
+        def from_configfile:可以被重写，从文件构建出Pipeline的方法
+        def save_configfile:可以被重写，从Pipeline保存为文件的方法
+        def get_executable_modules:可以被重写，获取Pipeline上的主要模块（带__call__）
     """
     def __init__(self, config_file=None):
         """
@@ -55,9 +55,14 @@ class Pipeline(ABC):
         :param config_file:     配置文件
         :return:                None
         """
-        with open(config_file, 'r') as file:
-            loaded_config = yaml.safe_load(file)
-            loaded_config = self._deserialize_config(loaded_config)
+        if isinstance(config_file, list):
+            loaded_config = self._merge_yaml_files(config_file)
+        elif isinstance(config_file, str):
+            with open(config_file, 'r') as file:
+                loaded_config = yaml.safe_load(file)
+                loaded_config = self._deserialize_config(loaded_config)
+        else:
+            raise TypeError('Config_file must be list or str')
         root_module = self._load_module_config(loaded_config)
         self.config = root_module.config
         self.modules = root_module.modules
@@ -69,7 +74,7 @@ class Pipeline(ABC):
         """
         config_to_save = self._get_module_config(self)
         with open(config_file, 'w') as file:
-            yaml.dump(config_to_save, file)
+            yaml.dump(config_to_save, file, indent=4, default_flow_style=False)
 
     def get_executable_modules(self) -> List[str]:
         """
@@ -132,3 +137,21 @@ class Pipeline(ABC):
             else:
                 deserialized_config[key] = value
         return deserialized_config
+
+    @staticmethod
+    def _merge_yaml_files(input_files: List[str]) -> Dict[str, Any]:
+        """
+        合并多个子模块的 YAML 文件
+        :param input_files:     子模块的 YAML 文件列表
+        :return:                合并后的配置字典
+        """
+        assert input_files is not None, ValueError("The input_files list should not be empty.")
+        with open(input_files[0], 'r') as f:
+            merged_config = yaml.safe_load(f)
+
+        for file in input_files[1:]:
+            with open(file, 'r') as f:
+                config = yaml.safe_load(f)
+                merged_config['modules'].append(config)
+
+        return merged_config
