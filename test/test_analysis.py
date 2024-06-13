@@ -5,7 +5,7 @@ class AnalysisModule(Pipeline):
     def setup(self):
         self.config = {}
 
-    def __call__(self):
+    def __call__(self, **kwargs):
         self.analyze_results()
         self.run()
 
@@ -20,7 +20,7 @@ class VisualizationModule(Pipeline):
     def setup(self):
         self.config = {}
 
-    def __call__(self):
+    def __call__(self, **kwargs):
         self.visualize_results()
 
     def visualize_results(self):

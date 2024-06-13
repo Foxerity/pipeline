@@ -11,7 +11,7 @@ class DataLoader(Pipeline):
             'path': 'data/dataset.zip'
         }
 
-    def __call__(self):
+    def __call__(self, **kwargs):
         self.get_data()
 
     def get_data(self):
@@ -39,7 +39,7 @@ class DataCleaner(Pipeline):
             'cleaning_params': {}
         }
 
-    def __call__(self):
+    def __call__(self, **kwargs):
         self.clean_data()
 
     def clean_data(self):
@@ -53,7 +53,7 @@ class DataPreprocessor(Pipeline):
             'augmentation': True
         }
 
-    def __call__(self):
+    def __call__(self, **kwargs):
         self.preprocess_data()
 
     def preprocess_data(self):

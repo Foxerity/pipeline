@@ -15,10 +15,10 @@ class DetectionModule1(Pipeline):
         for module in self.modules:
             module.setup()
 
-    def __call__(self):
+    def __call__(self, **kwargs):
         self.run()
 
-    def run(self):
+    def run(self, **kwargs):
         print(f"Running {self.config['name']} in {self.config['mode']} mode with parameters {self.config['params']}")
         for module in self.modules:
             module.run()
@@ -32,7 +32,7 @@ class DetectionModule2(Pipeline):
             'params': {}
         }
 
-    def __call__(self):
+    def __call__(self, **kwargs):
         self.run_detection()
 
     def run_detection(self):

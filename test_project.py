@@ -5,11 +5,12 @@ from test.test_analysis import AnalysisModule, VisualizationModule
 
 
 class ObjectDetectionProject(Pipeline):
+
     def setup(self):
         self.config = {
             'name': "Object Detection",
         }
-
+        # self.save_configfile(self.__class__.__name__ + '.yaml')
         # 添加各个模块
         self.modules = [
             DataLoader(),
@@ -20,10 +21,6 @@ class ObjectDetectionProject(Pipeline):
             AnalysisModule(),
             VisualizationModule()
         ]
-        # self.modules = [
-        #     DataLoader(),
-        # ]
-        # self.save_configfile(self.__class__.__name__ + '.yaml')
 
         # 逐个设置模块
         for module in self.modules:
@@ -32,25 +29,25 @@ class ObjectDetectionProject(Pipeline):
 
     def run(self, **kwargs):
         for module in self.modules:
-            module.run()
+            if hasattr(module, '__call__'):
+                module(**kwargs)
 
 
 if __name__ == '__main__':
     # 创建并设置项目
-    project = ObjectDetectionProject()
-    project.setup()
-    project.save_configfile('object_detection_project.yaml')
+    # project = ObjectDetectionProject()
+    # project.setup()
 
     # 从配置文件加载项目
     new_project = ObjectDetectionProject(config_file=[
-                                                        'ObjectDetectionProject.yaml',
-                                                        'DataCleaner.yaml',
-                                                        'DataPreprocessor.yaml',
-                                                        'DetectionModule1.yaml',
-                                                        'DetectionModule2.yaml',
-                                                        'AnalysisModule.yaml',
-                                                        'VisualizationModule.yaml'
-                                                    ])
+        'ObjectDetectionProject.yaml',
+        'DataCleaner.yaml',
+        'DataPreprocessor.yaml',
+        'DetectionModule1.yaml',
+        'DetectionModule2.yaml',
+        'AnalysisModule.yaml',
+        'VisualizationModule.yaml'
+    ])
     new_project.run()
     new_project.save_configfile("test.yaml")
 
