@@ -30,7 +30,7 @@ class MainPage(QtWidgets.QMainWindow):
 
     def init_main_UI(self):
         # 设置窗口位置和大小（x, y, width, height）
-        self.setGeometry(800, 800, 800, 800)
+        self.setGeometry(800, 800, 1600, 1000)
         self.setWindowTitle('Set Geometry Example')
 
         # 创建主窗口的 QTabWidget
