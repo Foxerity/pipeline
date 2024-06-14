@@ -1,5 +1,5 @@
 import os
-from PyQt5 import uic, QtWidgets, QtGui
+from PyQt5 import uic, QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import QTimer, Qt
 
 
@@ -48,6 +48,7 @@ class StreamVidTab(QtWidgets.QWidget):
         # 创建 QPixmap 并从文件加载图片
         pixmap = QtGui.QPixmap(image_path)
         pixmap = pixmap.scaled(self.show_frame.size())
+
         # 创建 QPalette 并设置 QFrame 的背景
         palette = self.show_frame.palette()
         palette.setBrush(QtGui.QPalette.Background, QtGui.QBrush(pixmap))
