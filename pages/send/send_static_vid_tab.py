@@ -4,5 +4,5 @@ from PyQt5.QtCore import Qt
 
 class StaticVidTab(QtWidgets.QWidget):
     def __init__(self, path):
-        super(StaticVidTab, self).__init__(flags=Qt.WindowFlags())
+        super(StaticVidTab, self).__init__()
         uic.loadUi(path, self)

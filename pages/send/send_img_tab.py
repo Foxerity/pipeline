@@ -4,5 +4,5 @@ from PyQt5.QtCore import Qt
 
 class ImageTabWidget(QtWidgets.QWidget):
     def __init__(self, path):
-        super(ImageTabWidget, self).__init__(flags=Qt.WindowFlags())
+        super(ImageTabWidget, self).__init__()
         uic.loadUi(path, self)

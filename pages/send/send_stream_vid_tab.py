@@ -5,7 +5,7 @@ from PyQt5.QtCore import QTimer, Qt
 
 class StreamVidTab(QtWidgets.QWidget):
     def __init__(self, path):
-        super(StreamVidTab, self).__init__(flags=Qt.WindowFlags())
+        super(StreamVidTab, self).__init__()
         uic.loadUi(path, self)
 
         self.show_frame = self.findChild(QtWidgets.QFrame, 'show_frame')

@@ -4,5 +4,5 @@ from PyQt5.QtCore import Qt
 
 class TextTabWidget(QtWidgets.QWidget):
     def __init__(self, path=None):
-        super(TextTabWidget, self).__init__(flags=Qt.WindowFlags())
+        super(TextTabWidget, self).__init__()
         uic.loadUi(path, self)
