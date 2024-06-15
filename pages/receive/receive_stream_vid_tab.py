@@ -1,10 +1,13 @@
 import os
+
+from PIL import Image
+from PIL.ImageQt import ImageQt
 from PyQt5 import uic, QtWidgets, QtGui
 from PyQt5.QtCore import QTimer, Qt
 
 
 class StreamVidTab(QtWidgets.QWidget):
-    def __init__(self, path):
+    def __init__(self, path, skeleton_queue, generation_queue):
         super(StreamVidTab, self).__init__(flags=Qt.WindowFlags())
         uic.loadUi(path, self)
 
@@ -20,57 +23,54 @@ class StreamVidTab(QtWidgets.QWidget):
         self.browserButton.setText('Browser Skeleton')
         self.sendButton.setText('Browser Generation')
 
-        self.browserButton.clicked.connect(lambda: self.open_file_dialog('skeleton_frame'))
-        self.sendButton.clicked.connect(lambda: self.open_file_dialog('gener_frame'))
+        self.skeleton_queue = skeleton_queue
+        self.generation_queue = generation_queue
 
-    def open_file_dialog(self, show_frame=None):
-        # 打开文件对话框选择目录
-        directory = QtWidgets.QFileDialog.getExistingDirectory(self, '选择目录')
-        if show_frame == 'skeleton_frame':
-            setattr(self, 'skeleton_directory', directory)
-        elif show_frame == 'gener_frame':
-            setattr(self, 'gener_directory', directory)
+        self.browserButton.clicked.connect(lambda: self.check_for_skeleton())
+        self.sendButton.clicked.connect(lambda: self.check_for_generation())
+
+    def check_for_skeleton(self):
+        if self.skeleton_queue and not self.skeleton_queue.empty():
+            img = self.skeleton_queue.get()
+            print('get img.')
+            if img and isinstance(img, Image.Image):
+                self.display_image(img, 'ske')
+                QTimer().singleShot(80, lambda: self.check_for_skeleton())
+            else:
+                QTimer().singleShot(80, lambda: self.check_for_skeleton())
         else:
-            raise ValueError
-        if directory:
-            print(f"监视目录：{directory}")
-            self.check_for_new_image(directory, show_frame)
+            QTimer().singleShot(80, lambda: self.check_for_skeleton())
 
-    def check_for_new_image(self, directory, show_frame=None):
-        # 获取目录中的所有文件
-        if show_frame == 'skeleton_frame':
-            if not directory == self.skeleton_directory:
-                return
-            show_frames = self.skeleton_frame
-        elif show_frame == 'gener_frame':
-            if not directory == self.gener_directory:
-                return
-            show_frames = self.gener_frame
+    def check_for_generation(self):
+        if self.generation_queue and not self.generation_queue.empty():
+            img = self.generation_queue.get()
+            print('get img.')
+            if img and isinstance(img, Image.Image):
+                self.display_image(img, 'gen')
+                QTimer().singleShot(80, lambda: self.check_for_generation())
+            else:
+                QTimer().singleShot(80, lambda: self.check_for_generation())
         else:
-            raise ValueError
+            QTimer().singleShot(80, lambda: self.check_for_generation())
 
-        files = os.listdir(directory)
-        # 过滤图片文件
-        image_files = [f for f in files if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif'))]
-
-        if image_files:
-            # 如果找到图片，显示第一张图片
-            image_path = os.path.join(directory, image_files[0])
-            self.display_image(image_path, show_frames)
-            os.remove(image_path)
-            QTimer().singleShot(1, lambda: self.check_for_new_image(directory, show_frame))
+    def display_image(self, image_path, img_type):
+        if isinstance(image_path, Image.Image):
+            pixmap = ImageQt(image_path)
         else:
-            # 如果没有图片，定时器每隔一段时间检查一次
-            QTimer().singleShot(1000, lambda: self.check_for_new_image(directory, show_frame))
+            pixmap = QtGui.QPixmap(image_path)
+        if img_type == 'ske':
+            pixmap = pixmap.scaled(self.skeleton_frame.size())
+            palette = self.skeleton_frame.palette()
+            palette.setBrush(QtGui.QPalette.Background, QtGui.QBrush(pixmap))
+            self.skeleton_frame.setPalette(palette)
+            self.skeleton_frame.setAutoFillBackground(True)
+            self.skeleton_frame.repaint()
+        elif img_type == 'gen':
+            pixmap = pixmap.scaled(self.gener_frame.size())
+            palette = self.gener_frame.palette()
+            palette.setBrush(QtGui.QPalette.Background, QtGui.QBrush(pixmap))
+            self.gener_frame.setPalette(palette)
+            self.gener_frame.setAutoFillBackground(True)
+            self.gener_frame.repaint()
 
-    @staticmethod
-    def display_image(image_path, show_frame=None):
-        # 创建 QPixmap 并从文件加载图片
-        pixmap = QtGui.QPixmap(image_path)
-        pixmap = pixmap.scaled(show_frame.size())
-        # 创建 QPalette 并设置 QFrame 的背景
-        palette = show_frame.palette()
-        palette.setBrush(QtGui.QPalette.Background, QtGui.QBrush(pixmap))
-        show_frame.setPalette(palette)
-        show_frame.setAutoFillBackground(True)
-        show_frame.repaint()
+

@@ -1,33 +1,28 @@
 import multiprocessing
-import os
-import time
-
-from PIL import Image
 
 from pipeline_abc import Pipeline
-from main_utils.processes.send.send_txt_process import TxtProcess
-from main_utils.processes.send.send_img_process import ImgProcess
-from main_utils.processes.send.send_static_vid_process import StaticVidProcess
-from main_utils.processes.send.send_stream_vid_process import StreamVidProcess
+from main_utils.processes.receive.receive_txt_process import TxtProcess
+from main_utils.processes.receive.receive_img_process import ImgProcess
+from main_utils.processes.receive.receive_static_vid_process import StaticVidProcess
+from main_utils.processes.receive.receive_stream_vid_process import StreamVidProcess
 
 
 class ProcessesControl(Pipeline):
-    def __init__(self, camera_queue):
+    def __init__(self):
         super().__init__()
-        self.camera_queue = camera_queue
+        self.skeleton_queue = None
+        self.generation_queue = None
 
-    def setup(self, **kwargs):
-        self.config = {
-            'name': "Object Detection"
-        }
+    def setup(self, skeleton_queue, generation_queue, **kwargs):
         self.modules = [
             TxtProcess(),
             ImgProcess(),
             StaticVidProcess(),
             StreamVidProcess(),
         ]
-
-        self.modules[3].setup(self.camera_queue)
+        self.skeleton_queue = skeleton_queue
+        self.generation_queue = generation_queue
+        self.modules[3].setup(self.skeleton_queue, self.generation_queue)
 
     def run(self, **kwargs):
         # txt_process = multiprocessing.process(self.modules[0].run(), args=(kwargs,))

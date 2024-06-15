@@ -1,4 +1,7 @@
+import multiprocessing
 import sys
+from multiprocessing import Queue
+
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
 
@@ -9,6 +12,8 @@ from pages.receive.receive_img_tab import ImageTabWidget
 from pages.receive.receive_static_vid_tab import StaticVidTab
 from pages.receive.receive_stream_vid_tab import StreamVidTab
 
+from main_utils.processes.receive.receive_processes_control import ProcessesControl
+
 
 class MainPage(QtWidgets.QMainWindow):
     pages_path = [
@@ -18,14 +23,14 @@ class MainPage(QtWidgets.QMainWindow):
         "ui/receive/receive_stream_vid_tab.ui",
     ]
 
-    def __init__(self):
+    def __init__(self, skeleton_queue, generation_queue):
         super(MainPage, self).__init__(flags=Qt.WindowFlags())
         self.initUI()
         # 加载并添加四个标签页, 分别对应文本、图像、静态视频、流式视频Tab
         self.tab_widget.addTab(TextTabWidget(self.pages_path[0]), "指令")
         self.tab_widget.addTab(ImageTabWidget(self.pages_path[1]), "图像")
         self.tab_widget.addTab(StaticVidTab(self.pages_path[2]), "静态视频")
-        self.tab_widget.addTab(StreamVidTab(self.pages_path[3]), "流式视频")
+        self.tab_widget.addTab(StreamVidTab(self.pages_path[3], skeleton_queue, generation_queue), "流式视频")
 
     def initUI(self):
         # 设置窗口位置和大小(x, y, width, height)
@@ -40,17 +45,28 @@ class MainPage(QtWidgets.QMainWindow):
 class MainWindow(Pipeline):
     def __init__(self):
         super(MainWindow, self).__init__()
-        self.main_page = MainPage()
+        self.skeleton_queue = Queue()
+        self.generation_queue = Queue()
+
+        self.main_page = MainPage(self.skeleton_queue, self.generation_queue)
 
     def setup(self, **kwargs):
-        pass
+        self.modules = [
+            self.main_page,
+            ProcessesControl()
+        ]
+
+        self.modules[1].setup(self.skeleton_queue, self.generation_queue)
 
     def run(self, callbacks: Callback = None, **kwargs):
+        processes_control_process = multiprocessing.Process(target=self.modules[1].run)
+        processes_control_process.start()
         self.main_page.show()
 
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     main = MainWindow()
+    main.setup()
     main.run()
     sys.exit(app.exec_())

@@ -10,10 +10,12 @@ from pipeline_abc import Pipeline
 class StreamVidProcess(Pipeline):
     def __init__(self):
         super().__init__()
-        self.camera_queue = None
+        self.skeleton_queue = None
+        self.generation_queue = None
 
-    def setup(self, camera_queue, **kwargs):
-        self.camera_queue = camera_queue
+    def setup(self, skeleton_queue, generation_queue, **kwargs):
+        self.skeleton_queue = skeleton_queue
+        self.generation_queue = generation_queue
 
     def run(self, callbacks: Callback = None, **kwargs):
         image_list = os.listdir(r'C:\Users\fengx\Desktop')
@@ -21,6 +23,9 @@ class StreamVidProcess(Pipeline):
         while True:
             for image in image_files:
                 img = Image.open(os.path.join(r'C:\Users\fengx\Desktop', image))
-                self.camera_queue.put(img)
-                print('put success.')
+                self.skeleton_queue.put(img)
+                print('put success skeleton')
+                img = Image.open(os.path.join(r'C:\Users\fengx\Desktop', image))
+                self.generation_queue.put(img)
+                print('put success generation.')
             time.sleep(2)
