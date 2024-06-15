@@ -4,18 +4,18 @@ from PyQt5.QtCore import Qt
 
 from callback.callback import Callback
 from pipeline_abc import Pipeline
-from pages.recive.recive_text_tab import TextTabWidget
-from pages.recive.recive_img_tab import ImageTabWidget
-from pages.recive.recive_static_vid_tab import StaticVidTab
-from pages.recive.recive_stream_vid_tab import StreamVidTab
+from pages.receive.receive_text_tab import TextTabWidget
+from pages.receive.receive_img_tab import ImageTabWidget
+from pages.receive.receive_static_vid_tab import StaticVidTab
+from pages.receive.receive_stream_vid_tab import StreamVidTab
 
 
 class MainPage(QtWidgets.QMainWindow):
     pages_path = [
-        "ui/recive/recive_txt_tab.ui",
-        "ui/recive/recive_img_tab.ui",
-        "ui/recive/recive_static_vid_tab.ui",
-        "ui/recive/recive_stream_vid_tab.ui",
+        "ui/receive/receive_txt_tab.ui",
+        "ui/receive/receive_img_tab.ui",
+        "ui/receive/receive_static_vid_tab.ui",
+        "ui/receive/receive_stream_vid_tab.ui",
     ]
 
     def __init__(self):

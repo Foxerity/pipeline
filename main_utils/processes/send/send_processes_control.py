@@ -1,8 +1,4 @@
 import multiprocessing
-import os
-import time
-
-from PIL import Image
 
 from pipeline_abc import Pipeline
 from main_utils.processes.send.send_txt_process import TxtProcess
