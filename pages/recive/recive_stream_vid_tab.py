@@ -12,8 +12,14 @@ class StreamVidTab(QtWidgets.QWidget):
         self.gener_frame = self.findChild(QtWidgets.QFrame, 'gener_frame')
         self.browserButton = self.findChild(QtWidgets.QPushButton, 'browserButton_3')
         self.sendButton = self.findChild(QtWidgets.QPushButton, 'sendButton_3')
+
+        browser_send_font = QtGui.QFont()
+        browser_send_font.setPointSize(14)
+        self.sendButton.setFont(browser_send_font)
+        self.browserButton.setFont(browser_send_font)
         self.browserButton.setText('Browser Skeleton')
         self.sendButton.setText('Browser Generation')
+
         self.browserButton.clicked.connect(lambda: self.open_file_dialog('skeleton_frame'))
         self.sendButton.clicked.connect(lambda: self.open_file_dialog('gener_frame'))
 

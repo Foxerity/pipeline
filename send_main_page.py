@@ -10,8 +10,6 @@ from pages.send.send_img_tab import ImageTabWidget
 from pages.send.send_static_vid_tab import StaticVidTab
 from pages.send.send_stream_vid_tab import StreamVidTab
 
-from main_utils.processes.send.send_processes_control import ProcessesControl
-
 
 class MainPage(QtWidgets.QMainWindow):
     pages_path = [
@@ -46,10 +44,7 @@ class MainWindow(Pipeline):
         self.main_page = MainPage()
 
     def setup(self, **kwargs):
-        self.modules = [
-            self.main_page,
-            ProcessesControl()
-        ]
+        pass
 
     def run(self, callbacks: Callback = None, **kwargs):
         self.main_page.show()
@@ -59,5 +54,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     main = MainWindow()
     main.run()
-    main.save_configfile('./config.yaml')
     sys.exit(app.exec_())

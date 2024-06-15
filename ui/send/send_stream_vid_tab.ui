@@ -10,6 +10,12 @@
     <height>900</height>
    </rect>
   </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
   <property name="minimumSize">
    <size>
     <width>0</width>
@@ -23,7 +29,7 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QFrame" name="show_frame">
+      <widget class="QFrame" name="show_frame_3">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -44,14 +50,14 @@
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_2">
        <item>
-        <widget class="QPushButton" name="browserButton">
+        <widget class="QPushButton" name="browserButton_3">
          <property name="text">
           <string>PushButton</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="sendButton">
+        <widget class="QPushButton" name="sendButton_3">
          <property name="minimumSize">
           <size>
            <width>0</width>

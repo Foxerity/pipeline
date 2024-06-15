@@ -5,12 +5,12 @@ from PyQt5.QtCore import QTimer, Qt
 
 class StreamVidTab(QtWidgets.QWidget):
     def __init__(self, path):
-        super(StreamVidTab, self).__init__()
+        super(StreamVidTab, self).__init__(flags=Qt.WindowFlags())
         uic.loadUi(path, self)
 
-        self.show_frame = self.findChild(QtWidgets.QFrame, 'show_frame')
-        self.browserButton = self.findChild(QtWidgets.QPushButton, 'browserButton')
-        self.sendButton = self.findChild(QtWidgets.QPushButton, 'sendButton')
+        self.show_frame = self.findChild(QtWidgets.QFrame, 'show_frame_3')
+        self.browserButton = self.findChild(QtWidgets.QPushButton, 'browserButton_3')
+        self.sendButton = self.findChild(QtWidgets.QPushButton, 'sendButton_3')
 
         self.browserButton.setText('Browser')
         self.sendButton.setText('Send')
