@@ -1,10 +1,12 @@
 import os
 from PyQt5 import uic, QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import QTimer, Qt
+from PIL import Image
+from PIL.ImageQt import ImageQt
 
 
 class StreamVidTab(QtWidgets.QWidget):
-    def __init__(self, path):
+    def __init__(self, path, cameraQueue):
         super(StreamVidTab, self).__init__(flags=Qt.WindowFlags())
         uic.loadUi(path, self)
 
@@ -15,15 +17,24 @@ class StreamVidTab(QtWidgets.QWidget):
         self.browserButton.setText('Browser')
         self.sendButton.setText('Send')
 
+        self.cameraQueue = cameraQueue
+
         self.browserButton.clicked.connect(self.open_file_dialog)
 
     def open_file_dialog(self):
-        # 打开文件对话框选择目录
-        directory = QtWidgets.QFileDialog.getExistingDirectory(self, '选择目录')
-        setattr(self, 'directory', directory)
-        if directory:
-            print(f"监视目录：{directory}")
-            self.check_for_new_image(directory)
+        self.check_for_camera()
+
+    def check_for_camera(self):
+        if self.cameraQueue and not self.cameraQueue.empty():
+            img = self.cameraQueue.get()
+            print('get img.')
+            if img and isinstance(img, Image.Image):
+                self.display_image(img)
+                QTimer().singleShot(80, lambda: self.check_for_camera())
+            else:
+                QTimer().singleShot(80, lambda: self.check_for_camera())
+        else:
+            QTimer().singleShot(80, lambda: self.check_for_camera())
 
     def check_for_new_image(self, directory):
         # 获取目录中的所有文件
@@ -45,8 +56,11 @@ class StreamVidTab(QtWidgets.QWidget):
             QTimer().singleShot(1000, lambda: self.check_for_new_image(directory))
 
     def display_image(self, image_path):
+        if isinstance(image_path, Image.Image):
+            pixmap = ImageQt(image_path)
         # 创建 QPixmap 并从文件加载图片
-        pixmap = QtGui.QPixmap(image_path)
+        else:
+            pixmap = QtGui.QPixmap(image_path)
         pixmap = pixmap.scaled(self.show_frame.size())
 
         # 创建 QPalette 并设置 QFrame 的背景

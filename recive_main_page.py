@@ -28,7 +28,7 @@ class MainPage(QtWidgets.QMainWindow):
         self.tab_widget.addTab(StreamVidTab(self.pages_path[3]), "流式视频")
 
     def initUI(self):
-        # 设置窗口位置和大小（x, y, width, height）
+        # 设置窗口位置和大小(x, y, width, height)
         self.setGeometry(800, 800, 1600, 1000)
         self.setWindowTitle('水下通信演示系统')
 
