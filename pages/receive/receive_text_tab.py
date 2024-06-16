@@ -10,15 +10,12 @@ class TextTabWidget(QtWidgets.QWidget):
         self.tradition_frame = self.findChild(QtWidgets.QFrame, 'tradition_frame_1')
         self.semantic_frame = self.findChild(QtWidgets.QFrame, 'semantic_frame_1')
         self.receiveButton = self.findChild(QtWidgets.QPushButton, 'receiveButton_1')
-        self.comboBox = self.findChild(QtWidgets.QComboBox, 'comboBox_1')
         self.calculateButton = self.findChild(QtWidgets.QPushButton, 'calculateButton_1')
 
         receive_calculate_font = QtGui.QFont()
-        receive_calculate_font.setPointSize(11)
+        receive_calculate_font.setPointSize(14)
         self.receiveButton.setFont(receive_calculate_font)
         self.calculateButton.setFont(receive_calculate_font)
         self.receiveButton.setText('接收')
         self.calculateButton.setText('计算')
 
-        self.choice = {"": 1}
-        self.comboBox.addItems(self.choice.keys())

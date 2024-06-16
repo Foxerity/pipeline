@@ -14,8 +14,12 @@ class StreamVidTab(QtWidgets.QWidget):
         self.browserButton = self.findChild(QtWidgets.QPushButton, 'browserButton_3')
         self.sendButton = self.findChild(QtWidgets.QPushButton, 'sendButton_3')
 
-        self.browserButton.setText('Browser')
-        self.sendButton.setText('Send')
+        browser_font = QtGui.QFont()
+        browser_font.setPointSize(14)
+        self.browserButton.setFont(browser_font)
+        self.sendButton.setFont(browser_font)
+        self.browserButton.setText('浏览')
+        self.sendButton.setText('发送')
 
         self.cameraQueue = cameraQueue
 

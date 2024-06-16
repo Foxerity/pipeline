@@ -13,21 +13,27 @@ class StreamVidTab(QtWidgets.QWidget):
 
         self.skeleton_frame = self.findChild(QtWidgets.QFrame, 'skeleton_frame')
         self.gener_frame = self.findChild(QtWidgets.QFrame, 'gener_frame')
-        self.browserButton = self.findChild(QtWidgets.QPushButton, 'browserButton_3')
-        self.sendButton = self.findChild(QtWidgets.QPushButton, 'sendButton_3')
+        self.skeletionButton = self.findChild(QtWidgets.QPushButton, 'skeletionButton')
+        self.generButton = self.findChild(QtWidgets.QPushButton, 'generButton')
+        self.calculateButton = self.findChild(QtWidgets.QPushButton, 'calculateButton_3')
+        self.receiveButton = self.findChild(QtWidgets.QPushButton, 'receiveButton_3')
 
-        browser_send_font = QtGui.QFont()
-        browser_send_font.setPointSize(14)
-        self.sendButton.setFont(browser_send_font)
-        self.browserButton.setFont(browser_send_font)
-        self.browserButton.setText('Browser Skeleton')
-        self.sendButton.setText('Browser Generation')
+        browser_font = QtGui.QFont()
+        browser_font.setPointSize(14)
+        self.receiveButton.setFont(browser_font)
+        self.calculateButton.setFont(browser_font)
+        self.skeletionButton.setFont(browser_font)
+        self.generButton.setFont(browser_font)
+        self.calculateButton.setText('计算')
+        self.receiveButton.setText('接收')
+        self.skeletionButton.setText('骨骼点')
+        self.generButton.setText('生成')
 
         self.skeleton_queue = skeleton_queue
         self.generation_queue = generation_queue
 
-        self.browserButton.clicked.connect(lambda: self.check_for_skeleton())
-        self.sendButton.clicked.connect(lambda: self.check_for_generation())
+        self.skeletionButton.clicked.connect(lambda: self.check_for_skeleton())
+        self.generButton.clicked.connect(lambda: self.check_for_generation())
 
     def check_for_skeleton(self):
         if self.skeleton_queue and not self.skeleton_queue.empty():

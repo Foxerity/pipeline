@@ -10,7 +10,6 @@ class ImageTabWidget(QtWidgets.QWidget):
         self.tradition_frame = self.findChild(QtWidgets.QFrame, 'tradition_frame_2')
         self.semantic_frame = self.findChild(QtWidgets.QFrame, 'semantic_frame_2')
         self.receiveButton = self.findChild(QtWidgets.QPushButton, 'receiveButton_2')
-        self.comboBox = self.findChild(QtWidgets.QComboBox, 'comboBox_2')
         self.calculateButton = self.findChild(QtWidgets.QPushButton, 'calculateButton_2')
 
         receive_calculate_font = QtGui.QFont()
@@ -19,6 +18,3 @@ class ImageTabWidget(QtWidgets.QWidget):
         self.calculateButton.setFont(receive_calculate_font)
         self.receiveButton.setText('接收')
         self.calculateButton.setText('计算')
-
-        self.choice = {"": 1}
-        self.comboBox.addItems(self.choice.keys())

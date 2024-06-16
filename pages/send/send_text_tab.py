@@ -1,4 +1,4 @@
-from PyQt5 import uic, QtWidgets
+from PyQt5 import uic, QtWidgets, QtGui
 from PyQt5.QtCore import Qt
 
 
@@ -11,5 +11,9 @@ class TextTabWidget(QtWidgets.QWidget):
         self.browserButton = self.findChild(QtWidgets.QPushButton, 'browserButton_1')
         self.sendButton = self.findChild(QtWidgets.QPushButton, 'sendButton_1')
 
+        browser_font = QtGui.QFont()
+        browser_font.setPointSize(14)
+        self.browserButton.setFont(browser_font)
+        self.sendButton.setFont(browser_font)
         self.browserButton.setText('浏览')
         self.sendButton.setText('发送')

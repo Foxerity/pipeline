@@ -35,6 +35,18 @@ class MainPage(QtWidgets.QMainWindow):
         self.tab_widget.addTab(StaticVidTab(self.pages_path[2]), "静态视频")
         self.tab_widget.addTab(StreamVidTab(self.pages_path[3], cameraQueue), "流式视频")
 
+        self.tab_widget.setStyleSheet("""
+                QTabBar::tab {
+                    font-size: 18px;      /* 设置字体大小为18px */
+                    height: 40px;         /* 设置标签高度为40px */
+                    width: 120px;         /* 设置标签宽度为120px */
+                    min-width: 100px;     /* 设置标签最小宽度为100px */
+                    min-height: 30px;     /* 设置标签最小高度为30px */
+                    max-width: 150px;     /* 设置标签最大宽度为150px */
+                    max-height: 50px;     /* 设置标签最大高度为50px */
+                }
+                """)
+
     def init_main_UI(self):
         # 设置窗口位置和大小（x, y, width, height）
         self.setGeometry(800, 800, 1600, 1000)

@@ -15,10 +15,11 @@ class StaticVidTab(QtWidgets.QWidget):
 
         receive_calculate_font = QtGui.QFont()
         receive_calculate_font.setPointSize(14)
+        self.comboBox.setFont(receive_calculate_font)
         self.receiveButton.setFont(receive_calculate_font)
         self.calculateButton.setFont(receive_calculate_font)
         self.receiveButton.setText('接收')
         self.calculateButton.setText('计算')
 
-        self.choice = {"": 1}
+        self.choice = {"视频1": 1, "视频2": 2, "视频3": 3, "视频4": 4}
         self.comboBox.addItems(self.choice.keys())
