@@ -16,11 +16,11 @@ class StreamVidProcess(Pipeline):
         self.camera_queue = camera_queue
 
     def run(self, callbacks: Callback = None, **kwargs):
-        image_list = os.listdir(r'C:\Users\fengx\Desktop')
+        image_list = os.listdir(r'C:\Users\16070\Desktop')
         image_files = [f for f in image_list if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif'))]
         while True:
             for image in image_files:
-                img = Image.open(os.path.join(r'C:\Users\fengx\Desktop', image))
+                img = Image.open(os.path.join(r'C:\Users\16070\Desktop', image))
                 self.camera_queue.put(img)
                 print('put success.')
             time.sleep(2)

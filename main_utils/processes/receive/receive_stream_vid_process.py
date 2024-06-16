@@ -18,14 +18,14 @@ class StreamVidProcess(Pipeline):
         self.generation_queue = generation_queue
 
     def run(self, callbacks: Callback = None, **kwargs):
-        image_list = os.listdir(r'C:\Users\fengx\Desktop')
+        image_list = os.listdir(r'C:\Users\16070\Desktop')
         image_files = [f for f in image_list if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp', '.gif'))]
         while True:
             for image in image_files:
-                img = Image.open(os.path.join(r'C:\Users\fengx\Desktop', image))
+                img = Image.open(os.path.join(r'C:\Users\16070\Desktop', image))
                 self.skeleton_queue.put(img)
                 print('put success skeleton')
-                img = Image.open(os.path.join(r'C:\Users\fengx\Desktop', image))
+                img = Image.open(os.path.join(r'C:\Users\16070\Desktop', image))
                 self.generation_queue.put(img)
                 print('put success generation.')
             time.sleep(2)

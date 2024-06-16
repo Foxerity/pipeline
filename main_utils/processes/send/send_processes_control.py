@@ -8,9 +8,10 @@ from main_utils.processes.send.send_stream_vid_process import StreamVidProcess
 
 
 class ProcessesControl(Pipeline):
-    def __init__(self, camera_queue):
+    def __init__(self, camera_queue, video_queue):
         super().__init__()
         self.camera_queue = camera_queue
+        self.video_queue = video_queue
 
     def setup(self, **kwargs):
         self.config = {
@@ -23,6 +24,7 @@ class ProcessesControl(Pipeline):
             StreamVidProcess(),
         ]
 
+        self.modules[2].setup(self.video_queue)
         self.modules[3].setup(self.camera_queue)
 
     def run(self, **kwargs):
@@ -32,8 +34,8 @@ class ProcessesControl(Pipeline):
         # img_process = multiprocessing.process(self.modules[1].run(), args=(kwargs,))
         # img_process.start()
 
-        # static_vid_process = multiprocessing.process(self.modules[2].run(), args=(kwargs,))
-        # static_vid_process.start()
+        static_vid_process = multiprocessing.Process(self.modules[2].run(), args=(kwargs,))
+        static_vid_process.start()
 
         stream_vid_process = multiprocessing.Process(self.modules[3].run())
         stream_vid_process.start()

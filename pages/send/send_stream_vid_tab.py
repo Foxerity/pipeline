@@ -3,6 +3,7 @@ from PyQt5 import uic, QtWidgets, QtGui, QtCore
 from PyQt5.QtCore import QTimer, Qt
 from PIL import Image
 from PIL.ImageQt import ImageQt
+from PyQt5.QtWidgets import QFileDialog
 
 
 class StreamVidTab(QtWidgets.QWidget):
@@ -26,7 +27,11 @@ class StreamVidTab(QtWidgets.QWidget):
         self.browserButton.clicked.connect(self.open_file_dialog)
 
     def open_file_dialog(self):
-        self.check_for_camera()
+        file_dialog = QFileDialog(self)
+        file_path, _ = file_dialog.getOpenFileName(self, "选择文件", "", "All Files (*)")
+        if file_path:
+            print("选择的文件路径：", file_path)
+            self.check_for_camera()
 
     def check_for_camera(self):
         if self.cameraQueue and not self.cameraQueue.empty():
