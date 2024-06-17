@@ -19,6 +19,7 @@ class StaticVidProcess(Pipeline):
 
     def run(self, callbacks: Callback = None, **kwargs):
         while True:
-            video_name = self.video_queue.get()
-            print('put success.')
+            if not self.video_queue.empty():
+                video_name = self.video_queue.get()
+                print('put success.')
             time.sleep(2)

@@ -34,10 +34,10 @@ class ProcessesControl(Pipeline):
         # img_process = multiprocessing.process(self.modules[1].run(), args=(kwargs,))
         # img_process.start()
 
-        static_vid_process = multiprocessing.Process(self.modules[2].run(), args=(kwargs,))
+        static_vid_process = multiprocessing.Process(target=self.modules[2].run)
         static_vid_process.start()
 
-        stream_vid_process = multiprocessing.Process(self.modules[3].run())
+        stream_vid_process = multiprocessing.Process(target=self.modules[3].run)
         stream_vid_process.start()
 
 
