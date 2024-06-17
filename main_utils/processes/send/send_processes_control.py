@@ -37,7 +37,7 @@ class ProcessesControl(Pipeline):
         static_vid_process = multiprocessing.Process(target=self.modules[2].run)
         static_vid_process.start()
 
-        stream_vid_process = multiprocessing.Process(target=self.modules[3].run)
-        stream_vid_process.start()
+        # stream_vid_process = multiprocessing.Process(target=self.modules[3].run)
+        # stream_vid_process.start()
 
 

@@ -183,3 +183,12 @@ cython_debug/
 *.exe
 main_utils/processes/receive/utils/logger/
 main_utils/processes/receive/utils/traditional_underwater_simulate_channel/
+*.tar
+*.pth
+*.npy
+*.ipynb
+*.PNG
+*.pkl
+*.cfg
+*.bin
+main_utils/processes/send/send_utils/

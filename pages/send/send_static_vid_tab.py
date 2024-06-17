@@ -38,6 +38,7 @@ class StaticVidTab(QtWidgets.QWidget):
         file_dialog = QFileDialog(self)
         file_path, _ = file_dialog.getOpenFileName(self, "选择文件", "", "All Files (*)")
         if file_path:
+            self.video_queue.put(file_path)
             print("选择的文件路径：", file_path)
             self.start_playing(file_path)
 
