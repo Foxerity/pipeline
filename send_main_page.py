@@ -71,13 +71,21 @@ class MainWindow(Pipeline):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.control_queue = Queue()
+
         self.txt_queue = Queue()
+        self.txt_send_queue = Queue()
+
         self.video_queue = Queue()
+
         self.camera_queue = Queue()
 
         self.queue_dict['control_queue'] = self.control_queue
+
         self.queue_dict['txt_proc'] = self.txt_queue
+        self.queue_dict['txt_send_queue'] = self.txt_send_queue
+
         self.queue_dict['static_vid_pro'] = self.video_queue
+
         self.queue_dict['stream_vid_pro'] = self.camera_queue
 
         self.main_page = MainPage(self.queue_dict)

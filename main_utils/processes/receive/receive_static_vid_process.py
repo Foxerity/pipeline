@@ -1,12 +1,8 @@
 import multiprocessing
-import os
-import sys
 import time
 
-from PIL import Image
 
 from pipeline_abc import Pipeline
-# from utils.SPADE.serial_demo_fish import main as fish_main
 from main_utils.processes.receive.utils.SPADE.serial_demo_single import receive_class
 
 
@@ -15,11 +11,13 @@ class StaticVidProcess(Pipeline):
         super().__init__()
         self.vid_obj_queue = None
         self.rece_vid_queue = None
+        self.socket_queue = None
         self.model_name = None
 
-    def setup(self, vid_obj_queue, rece_vid_queue, **kwargs):
+    def setup(self, vid_obj_queue, rece_vid_queue, socket_queue, **kwargs):
         self.vid_obj_queue = vid_obj_queue
         self.rece_vid_queue = rece_vid_queue
+        self.socket_queue = socket_queue
 
     def run(self, **kwargs):
         while True:
@@ -30,7 +28,7 @@ class StaticVidProcess(Pipeline):
                     "dataset_mode": "pix2pix",
                     "label_nc": 0
                 }
-                receive = receive_class(self.rece_vid_queue, dic)
+                receive = receive_class(self.rece_vid_queue, self.socket_queue, dic)
                 process = multiprocessing.Process(target=receive.main)
                 process.start()
             time.sleep(0.5)

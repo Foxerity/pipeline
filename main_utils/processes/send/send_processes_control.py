@@ -15,7 +15,9 @@ class ProcessesControl(Pipeline):
 
     def setup(self, queue_dict, **kwargs):
         self.config = {
-            'name': "Object Detection"
+            'name': "Object Detection",
+            'host': '10.168.2.191',
+            'port': 5000,
         }
         self.queue_dict = queue_dict
 
@@ -27,14 +29,14 @@ class ProcessesControl(Pipeline):
             StreamVidProcess(),
         ]
 
-        # self.modules[0].setup(self.queue_dict['txt_proc'])
-        self.modules[1].setup(self.queue_dict['txt_proc'])
+        self.modules[0].setup(self.config['host'], self.config['port'], self.queue_dict)
+        self.modules[1].setup(self.queue_dict['txt_proc'], self.queue_dict['txt_send_queue'])
         # self.modules[2].setup(self.queue_dict['static_vid_pro'])
         # self.modules[3].setup(self.queue_dict['stream_vid_pro'])
 
     def run(self, **kwargs):
-        # socket_process = multiprocessing.Process(target=self.run_socket_process)
-        # socket_process.start()
+        socket_process = multiprocessing.Process(target=self.modules[0].run)
+        socket_process.start()
 
         txt_process = multiprocessing.Process(target=self.modules[1].run)
         txt_process.start()
