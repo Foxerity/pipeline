@@ -46,6 +46,8 @@ class Pipeline(ABC):
                 callback.before_run()
             if hasattr(module, '__call__'):
                 module(**kwargs)
+            elif hasattr(module, 'run'):
+                module.run(**kwargs)
             for callback in callbacks or []:
                 callback.after_run()
 

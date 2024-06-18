@@ -33,7 +33,7 @@ class MainPage(QtWidgets.QMainWindow):
         self.tab_widget = QtWidgets.QTabWidget()
         self.init_main_UI()
         # 加载并添加四个标签页, 分别对应文本、图像、静态视频、流式视频Tab
-        self.tab_widget.addTab(TextTabWidget(self.pages_path[0]), "指令")
+        self.tab_widget.addTab(TextTabWidget(self.pages_path[0], queue_dict['txt_proc']), "指令")
         self.tab_widget.addTab(ImageTabWidget(self.pages_path[1]), "图像")
         self.tab_widget.addTab(StaticVidTab(self.pages_path[2], queue_dict['static_vid_pro']), "静态视频")
         self.tab_widget.addTab(StreamVidTab(self.pages_path[3], queue_dict['stream_vid_pro']), "流式视频")
@@ -70,18 +70,19 @@ class MainWindow(Pipeline):
 
     def __init__(self):
         super(MainWindow, self).__init__()
+        self.control_queue = Queue()
+        self.txt_queue = Queue()
         self.video_queue = Queue()
         self.camera_queue = Queue()
+
+        self.queue_dict['control_queue'] = self.control_queue
+        self.queue_dict['txt_proc'] = self.txt_queue
         self.queue_dict['static_vid_pro'] = self.video_queue
         self.queue_dict['stream_vid_pro'] = self.camera_queue
 
         self.main_page = MainPage(self.queue_dict)
 
-        self.process_control = ProcessesControl(self.camera_queue, self.video_queue)
-
-        self.path = r'/home/samaritan/Project/pipeline/main_utils/processes/send/send_utils/'
-        self.host = '192.168.2.124'
-        self.port = 12346
+        self.process_control = ProcessesControl()
 
     def setup(self, **kwargs):
         self.modules = [
@@ -89,12 +90,11 @@ class MainWindow(Pipeline):
             self.process_control,
         ]
 
-        self.process_control.setup(self.path, self.host, self.port)
+        self.process_control.setup(self.queue_dict)
 
     def run(self, callbacks: Callback = None, **kwargs):
-        self.process_control.run()
-        # PyQt的主界面不建议在子进程运行，会出现不稳定的情况。
-        self.main_page.run()
+        for module in self.modules:
+            module.run()
 
 
 if __name__ == "__main__":

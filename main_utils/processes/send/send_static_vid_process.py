@@ -29,6 +29,7 @@ class StaticVidProcess(Pipeline):
         self.handle_video_dynamic = HandleVideoDynamic()
 
     def run(self, callbacks: Callback = None, **kwargs):
+        from main_utils.processes.send.send_utils.main import parse_args, handle_video
 
         # object_list = ["海底黄色", "sea_yellowbox",
         #                "海底渔船", "sea_ship",

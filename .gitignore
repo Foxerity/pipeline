@@ -192,3 +192,4 @@ main_utils/processes/receive/utils/traditional_underwater_simulate_channel/
 *.cfg
 *.bin
 main_utils/processes/send/send_utils/
+main_utils/processes/receive/utils/

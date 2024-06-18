@@ -8,15 +8,16 @@ from main_utils.processes.send.send_stream_vid_process import StreamVidProcess
 
 
 class ProcessesControl(Pipeline):
-    def __init__(self, camera_queue, video_queue):
+    def __init__(self):
         super().__init__()
-        self.camera_queue = camera_queue
-        self.video_queue = video_queue
+        self.queue_dict = None
 
-    def setup(self, path, host, port, **kwargs):
+    def setup(self, queue_dict, **kwargs):
         self.config = {
             'name': "Object Detection"
         }
+        self.queue_dict = queue_dict
+
         self.modules = [
             TxtProcess(),
             ImgProcess(),
@@ -24,24 +25,21 @@ class ProcessesControl(Pipeline):
             StreamVidProcess(),
         ]
 
-        self.modules[2].setup(self.video_queue, path, host, port)
-        self.modules[3].setup(self.camera_queue)
+        self.modules[0].setup(self.queue_dict['txt_proc'])
+        # self.modules[2].setup(self.queue_dict['static_vid_pro'])
+        # self.modules[3].setup(self.queue_dict['stream_vid_pro'])
 
     def run(self, **kwargs):
-        # txt_process = multiprocessing.process(self.modules[0].run(), args=(kwargs,))
-        # txt_process.start()
+        txt_process = multiprocessing.Process(target=self.modules[0].run)
+        txt_process.start()
 
         # img_process = multiprocessing.process(self.modules[1].run(), args=(kwargs,))
         # img_process.start()
 
-        static_vid_process = multiprocessing.Process(target=self.modules[2].run)
-        static_vid_process.start()
+        # static_vid_process = multiprocessing.Process(target=self.modules[2].run)
+        # static_vid_process.start()
 
         # stream_vid_process = multiprocessing.Process(target=self.modules[3].run)
         # stream_vid_process.start()
-
-
-
-
 
 
