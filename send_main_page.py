@@ -79,13 +79,17 @@ class MainWindow(Pipeline):
 
         self.process_control = ProcessesControl(self.camera_queue, self.video_queue)
 
+        self.path = r'/home/samaritan/Project/pipeline/main_utils/processes/send/send_utils/'
+        self.host = '192.168.2.124'
+        self.port = 12346
+
     def setup(self, **kwargs):
         self.modules = [
             self.main_page,
             self.process_control,
         ]
 
-        self.process_control.setup()
+        self.process_control.setup(self.path, self.host, self.port)
 
     def run(self, callbacks: Callback = None, **kwargs):
         self.process_control.run()

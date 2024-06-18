@@ -13,7 +13,7 @@ class ProcessesControl(Pipeline):
         self.camera_queue = camera_queue
         self.video_queue = video_queue
 
-    def setup(self, **kwargs):
+    def setup(self, path, host, port, **kwargs):
         self.config = {
             'name': "Object Detection"
         }
@@ -24,7 +24,7 @@ class ProcessesControl(Pipeline):
             StreamVidProcess(),
         ]
 
-        self.modules[2].setup(self.video_queue)
+        self.modules[2].setup(self.video_queue, path, host, port)
         self.modules[3].setup(self.camera_queue)
 
     def run(self, **kwargs):
@@ -39,5 +39,9 @@ class ProcessesControl(Pipeline):
 
         # stream_vid_process = multiprocessing.Process(target=self.modules[3].run)
         # stream_vid_process.start()
+
+
+
+
 
 
