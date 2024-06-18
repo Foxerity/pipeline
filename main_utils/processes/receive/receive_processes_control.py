@@ -13,6 +13,7 @@ class ProcessesControl(Pipeline):
         super().__init__()
         self.txt_queue = None
         self.txt_tral_queue = None
+        self.txt_socket_queue = None
 
         self.img_queue = None
 
@@ -25,8 +26,9 @@ class ProcessesControl(Pipeline):
 
     def setup(self, queue_dict, **kwargs):
         self.config = {
-            'host': '192.168.2.137',
-            'port': 11111,
+            # 'host': '192.168.2.137',
+            'host': '127.0.0.1',
+            'port': 60000,
         }
         self.modules = [
             ReceiveSocketProcess(),
@@ -35,8 +37,10 @@ class ProcessesControl(Pipeline):
             StaticVidProcess(),
             StreamVidProcess(),
         ]
+
         self.txt_queue = queue_dict['txt_queue']
         self.txt_tral_queue = queue_dict['txt_tral_queue']
+        self.txt_socket_queue = queue_dict['txt_socket_queue']
 
         self.img_queue = queue_dict['img_queue']
 
@@ -48,9 +52,9 @@ class ProcessesControl(Pipeline):
         self.generation_queue = queue_dict['generation_queue']
 
         self.modules[0].setup(self.config['host'], self.config['port'], queue_dict)
-        # self.modules[1].setup(self.txt_queue, self.txt_tral_queue)
+        self.modules[1].setup(self.txt_socket_queue, self.txt_queue, self.txt_tral_queue)
         # self.modules[2].setup(self.vid_obj_queue)
-        self.modules[3].setup(self.vid_obj_queue, self.rece_vid_queue, self.socket_queue)
+        # self.modules[3].setup(self.vid_obj_queue, self.rece_vid_queue, self.socket_queue)
         # self.modules[4].setup(self.skeleton_queue, self.generation_queue)
 
     def run(self, **kwargs):
@@ -58,13 +62,13 @@ class ProcessesControl(Pipeline):
         txt_process = multiprocessing.Process(target=self.modules[0].run)
         txt_process.start()
 
-        # img_process = multiprocessing.Process(target=self.modules[1].run)
-        # img_process.start()
+        img_process = multiprocessing.Process(target=self.modules[1].run)
+        img_process.start()
         #
         # static_vid_process = multiprocessing.Process(target=self.modules[2].run)
         # static_vid_process.start()
         #
-        stream_vid_process = multiprocessing.Process(target=self.modules[3].run)
-        stream_vid_process.start()
+        # stream_vid_process = multiprocessing.Process(target=self.modules[3].run)
+        # stream_vid_process.start()
 
 

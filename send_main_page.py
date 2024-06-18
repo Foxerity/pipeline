@@ -39,6 +39,10 @@ class MainPage(QtWidgets.QMainWindow):
         self.tab_widget.addTab(StaticVidTab(self.pages_path[2], queue_dict['static_vid_pro']), "静态视频")
         self.tab_widget.addTab(StreamVidTab(self.pages_path[3], queue_dict['stream_vid_pro']), "流式视频")
 
+        self.tab_widget.currentChanged.connect(self.on_tab_changed)
+        self.on_tab_changed(0)
+
+
     def init_main_UI(self):
         # 设置窗口位置和大小（x, y, width, height）
         self.setGeometry(800, 800, 1600, 1000)
@@ -70,6 +74,7 @@ class MainPage(QtWidgets.QMainWindow):
             print("Text Tab is selected")
             queue_tuple = self.queue_dict['txt_socket_queue']
             self.queue_dict['control_queue'].put(queue_tuple)
+            print("putting txt_socket_queue")
         elif index == 1:
             print("Image Tab is selected")
         elif index == 2:

@@ -30,11 +30,13 @@ class SendSocketProcess(Pipeline):
         while True:
             if not self.queue_dict['control_queue'].empty():
                 new_queue = self.queue_dict['control_queue'].get()
+                print("socket: getting new queue.")
                 self.current_queue = new_queue
                 self.clear_queue()
             if self.current_queue and not self.current_queue.empty():
                 msg = self.current_queue.get_nowait()
                 self.send_message(msg)
+                print(f"socket: sending message {len(msg)}")
             time.sleep(0.5)
 
     def send_message(self, message):

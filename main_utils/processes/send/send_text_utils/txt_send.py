@@ -43,6 +43,7 @@ class Sender:
             cn_sentences, int_numbers, float_numbers = split_sentences([single_sentence])
             bit_stream = self.process_sentence(cn_sentences[0], int_numbers, float_numbers, single_sentence)
             self.txt_socket_queue.put(bit_stream)
+            print(f"sending bit_stream {len(bit_stream)}")
 
     def parse_arguments(self):
         parser = argparse.ArgumentParser(description="Configuration for the Sender model.")

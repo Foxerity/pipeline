@@ -42,9 +42,9 @@ class ReceiveSocketProcess(Pipeline):
                 self.current_queue = new_queue
                 self.clear_queue()
                 self.clean_channel(data_length)
-                print(f"start putting data to {new_queue}")
 
             data = self.receive_message(data_length)
+            print(f"start getting {len(data)} data from {new_queue}")
 
             if data and self.current_queue:
                 self.current_queue.put(data)
@@ -57,7 +57,7 @@ class ReceiveSocketProcess(Pipeline):
                 return None
             return data
         except socket.error as e:
-            print(f"Socket error: {e}")
+            print(f"receive_message: Socket error: {e}")
             return None
 
     def clean_channel(self, data_length):
@@ -66,7 +66,7 @@ class ReceiveSocketProcess(Pipeline):
             try:
                 self.conn.recv(data_length)
             except socket.error as e:
-                print(f"Socket error: {e}")
+                print(f"clean_channel: Socket error: {e}")
                 break
         self.conn.setblocking(True)
 
