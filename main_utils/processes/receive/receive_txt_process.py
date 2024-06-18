@@ -14,25 +14,29 @@ class TxtProcess(Pipeline):
         self.receiver = Receiver()
         self.txt_queue = None
         self.test_queue = None
+        self.txt_tral_queue = None
 
-    def setup(self, txt_queue, **kwargs):
+    def setup(self, txt_queue, txt_tral_queue, **kwargs):
         self.test_queue = Queue()
+        self.txt_tral_queue = Queue()
         self.txt_queue = txt_queue
+        self.txt_tral_queue = txt_tral_queue
         self.modules = [
             Receiver()
         ]
 
     def run(self, callbacks: Callback = None, **kwargs):
-        self.test_block(self.test_queue)
+        self.test_block(self.test_queue, self.txt_tral_queue)
         while True:
             if not self.test_queue.empty():
-                self.modules[0].run(self.test_queue, self.txt_queue)
+                self.modules[0].run(self.test_queue, self.txt_queue, self.txt_tral_queue)
             time.sleep(1)
 
     @staticmethod
-    def test_block(q1):
+    def test_block(q1, txt_tral_queue):
         test_send = Sender()
-        txt_pth = r"D:\project\pipeline\main_utils\processes\send\send_text_utils\data\input\1.txt"
+
+        txt_pth = r"D:\project\pipeline\main_utils\processes\send\send_text_utils\data\input\test_10.txt"
         q1.put(txt_pth)
-        test_send.run(q1)
+        test_send.run(q1, txt_tral_queue)
 

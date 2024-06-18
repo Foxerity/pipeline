@@ -7,7 +7,7 @@ from PIL import Image
 from callback.callback import Callback
 from pipeline_abc import Pipeline
 
-from main_utils.processes.send.send_utils.main import parse_args, HandleVideo, HandleVideoDynamic
+# from main_utils.processes.send.send_utils.main import parse_args, HandleVideo, HandleVideoDynamic
 
 
 class StaticVidProcess(Pipeline):
@@ -25,8 +25,8 @@ class StaticVidProcess(Pipeline):
         self.port = port
 
         self.video_queue = video_queue
-        self.handle_video = HandleVideo()
-        self.handle_video_dynamic = HandleVideoDynamic()
+        # self.handle_video = HandleVideo()
+        # self.handle_video_dynamic = HandleVideoDynamic()
 
     def run(self, callbacks: Callback = None, **kwargs):
         from main_utils.processes.send.send_utils.main import parse_args, handle_video

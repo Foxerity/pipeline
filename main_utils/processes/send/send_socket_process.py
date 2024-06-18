@@ -4,7 +4,7 @@ import time
 from pipeline_abc import Pipeline
 
 
-class ReceiveSocketProcess(Pipeline):
+class SendSocketProcess(Pipeline):
     def __init__(self):
         super().__init__()
         self.host = None
@@ -35,5 +35,5 @@ class ReceiveSocketProcess(Pipeline):
                 self.send_message(msg)
             time.sleep(0.5)
 
-    def send_message(self, message, func):
-        self.socket.sendall(message.encode('utf-8'))
+    def send_message(self, message):
+        self.socket.sendall(message)

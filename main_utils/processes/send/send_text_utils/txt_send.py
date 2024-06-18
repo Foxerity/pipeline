@@ -24,14 +24,16 @@ class Sender:
         self.end_idx = self.token_to_idx.get("<END>")
         self.deepsc = None
         self.txt_queue = None
+        self.txt_tral_queue = None
 
     def setup(self):
         self.deepsc = self.initialize_deepsc()
         self.load_checkpoint()
 
-    def run(self, txt_queue):
+    def run(self, txt_queue, txt_tral_queue):
         self.setup()
         self.txt_queue = txt_queue
+        self.txt_tral_queue = txt_tral_queue
         input_dir = txt_queue.get()
 
         # 读出文件夹中所有.txt文件的句子
@@ -39,7 +41,7 @@ class Sender:
 
         for single_sentence in process_sentences:
             cn_sentences, int_numbers, float_numbers = split_sentences([single_sentence])
-            self.process_sentence(cn_sentences[0], int_numbers, float_numbers)
+            self.process_sentence(cn_sentences[0], int_numbers, float_numbers, single_sentence)
 
     def parse_arguments(self):
         parser = argparse.ArgumentParser(description="Configuration for the Sender model.")
@@ -97,7 +99,7 @@ class Sender:
             checkpoint = torch.load(latest_checkpoint_path)
             self.deepsc.load_state_dict(checkpoint)
 
-    def process_sentence(self, sentence, int_numbers, float_numbers):
+    def process_sentence(self, sentence, int_numbers, float_numbers, single_sentence):
         self.deepsc.eval()
         with torch.no_grad():
             # 数据准备
@@ -107,7 +109,7 @@ class Sender:
             enc_output = self.deepsc.encoder(sent_tensor, sent_mask)  # 语义编码
             channel_enc_output = self.deepsc.channel_encoder(enc_output)  # 信道编码
             Tx_sig = PowerNormalize(channel_enc_output)  # 归一化
-            bit_stream = self.prepare_bit_stream(Tx_sig, int_numbers, float_numbers)
+            bit_stream = self.prepare_bit_stream(Tx_sig, int_numbers, float_numbers, single_sentence)
             self.txt_queue.put(bit_stream)
 
     def prepare_sentence(self, sentence):
@@ -118,7 +120,7 @@ class Sender:
         return (sentence_tensor == self.pad_idx).unsqueeze(-2).type(torch.FloatTensor).to(self.device)
 
     @staticmethod
-    def prepare_bit_stream(Tx_sig, int_numbers, float_numbers):
+    def prepare_bit_stream(Tx_sig, int_numbers, float_numbers, single_sentence):
         Tx_sig = Tx_sig.cpu().numpy().tolist()
-        total = [Tx_sig] + [int_numbers] * 5 + [float_numbers] * 5
+        total = [Tx_sig] + [int_numbers] * 5 + [float_numbers] * 5 + [single_sentence]
         return list_to_bytes(total)

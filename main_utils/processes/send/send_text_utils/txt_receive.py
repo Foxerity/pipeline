@@ -16,22 +16,24 @@ class Receiver:
         self.start_idx = self.token_to_idx.get("<START>")
         self.end_idx = self.token_to_idx.get("<END>")
         self.receive_data_queue = None
+        self.txt_tral_queue = None
 
     def setup(self):
         self.deepsc = self.initialize_deepsc()
         self.load_checkpoint()
         self.deepsc.eval()
 
-    def run(self, send_data_queue, receive_data_queue):
+    def run(self, send_data_queue, receive_data_queue, txt_tral_queue):
         self.setup()
         while True:
 
             if not send_data_queue.empty():
                 self.receive_data_queue = receive_data_queue
+                self.txt_tral_queue = txt_tral_queue
 
                 bit_stream = send_data_queue.get()
                 receive = bytes_to_list(bit_stream)
-                Rx_sig, int_1, int_2, int_3, int_4, int_5, float_1, float_2, float_3, float_4, float_5 = receive
+                Rx_sig, int_1, int_2, int_3, int_4, int_5, float_1, float_2, float_3, float_4, float_5, tral_txt = receive
                 Rx_sig = torch.tensor(Rx_sig).to(self.device)
 
                 total_int = most_frequent_element_int(torch.tensor(int_1), torch.tensor(int_2), torch.tensor(int_3),
@@ -41,7 +43,7 @@ class Receiver:
                                                           torch.tensor(float_5))
                 outputs = self.decode_signal(Rx_sig)
                 result_string = self.process_output(outputs)
-                self.save_result(result_string, total_int, total_float)
+                self.save_result(result_string, total_int, total_float, tral_txt)
 
     def parse_arguments(self):
         parser = argparse.ArgumentParser(description="Configuration for the Receiver model.")
@@ -120,14 +122,15 @@ class Receiver:
         result_string = [' '.join(result_string[0].split())]
         return result_string
 
-    def save_result(self, result_string, total_int, total_float):
+    def save_result(self, result_string, total_int, total_float, tral_txt):
         final = replace_and_return(result_string, total_int, total_float)
         file_contents = "".join(final[0]).replace("， ", "，") + "\n"
 
         if file_contents.strip():  # Check if file_contents is not just whitespace or empty
             with open("./output.txt", 'a', encoding='utf-8') as file:
                 file.write(file_contents)
-            print(file_contents)
             self.receive_data_queue.put(file_contents)
+            self.txt_tral_queue.put(tral_txt)
+
 
 

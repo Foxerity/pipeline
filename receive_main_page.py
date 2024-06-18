@@ -24,13 +24,13 @@ class MainPage(QtWidgets.QMainWindow):
         "ui/receive/receive_stream_vid_tab.ui",
     ]
 
-    def __init__(self, txt_queue, skeleton_queue, generation_queue, vid_obj_queue, rece_vid_queue):
+    def __init__(self, txt_queue, txt_tral_queue, skeleton_queue, generation_queue, vid_obj_queue, rece_vid_queue):
         super(MainPage, self).__init__(flags=Qt.WindowFlags())
         # 创建主窗口的 QTabWidget
         self.tab_widget = QtWidgets.QTabWidget()
         self.initUI()
         # 加载并添加四个标签页, 分别对应文本、图像、静态视频、流式视频Tab
-        self.tab_widget.addTab(TextTabWidget(self.pages_path[0], txt_queue), "指令")
+        self.tab_widget.addTab(TextTabWidget(self.pages_path[0], txt_queue, txt_tral_queue), "指令")
         self.tab_widget.addTab(ImageTabWidget(self.pages_path[1]), "图像")
         self.tab_widget.addTab(StaticVidTab(self.pages_path[2], vid_obj_queue, rece_vid_queue), "静态视频")
         self.tab_widget.addTab(StreamVidTab(self.pages_path[3], skeleton_queue, generation_queue), "流式视频")
@@ -60,6 +60,9 @@ class MainWindow(Pipeline):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.txt_queue = Queue()
+        self.txt_tral_queue = Queue()
+
+        self.img_queue = Queue()
 
         self.vid_obj_queue = Queue()
         self.receive_queue = Queue()
@@ -67,7 +70,7 @@ class MainWindow(Pipeline):
         self.skeleton_queue = Queue()
         self.generation_queue = Queue()
 
-        self.main_page = MainPage(self.txt_queue, self.skeleton_queue, self.generation_queue, self.vid_obj_queue, self.receive_queue)
+        self.main_page = MainPage(self.txt_queue, self.txt_tral_queue, self.skeleton_queue, self.generation_queue, self.vid_obj_queue, self.receive_queue)
 
     def setup(self, **kwargs):
         self.modules = [
@@ -75,7 +78,7 @@ class MainWindow(Pipeline):
             ProcessesControl()
         ]
 
-        self.modules[1].setup(self.txt_queue, self.skeleton_queue, self.generation_queue, self.vid_obj_queue, self.receive_queue)
+        self.modules[1].setup(self.txt_queue, self.txt_tral_queue, self.img_queue, self.skeleton_queue, self.generation_queue, self.vid_obj_queue, self.receive_queue)
 
     def run(self, callbacks: Callback = None, **kwargs):
         processes_control_process = multiprocessing.Process(target=self.modules[1].run)
