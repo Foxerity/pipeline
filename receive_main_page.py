@@ -79,11 +79,14 @@ class MainPage(QtWidgets.QMainWindow):
         # 执行不同的操作，根据当前选中的标签页
         if index == 0:
             print("Text Tab is selected")
+            queue_tuple = (1047, self.queue_dict['txt_socket_queue'])
+            self.queue_dict['control_queue'].put(queue_tuple)
         elif index == 1:
             print("Image Tab is selected")
         elif index == 2:
             print("Static Video Tab is selected")
-            self.queue_dict['control_queue'].put(self.queue_dict['static_socket_queue'])
+            queue_tuple = (1047, self.queue_dict['static_socket_queue'])
+            self.queue_dict['control_queue'].put(queue_tuple)
         elif index == 3:
             print("Stream Video Tab is selected")
 
@@ -107,6 +110,7 @@ class MainWindow(Pipeline):
 
         self.txt_queue = manager.Queue()
         self.txt_tral_queue = manager.Queue()
+        self.txt_socket_queue = manager.Queue()
 
         self.img_queue = manager.Queue()
 
@@ -121,6 +125,7 @@ class MainWindow(Pipeline):
 
         self.queue_dict["txt_queue"] = self.txt_queue
         self.queue_dict["txt_tral_queue"] = self.txt_tral_queue
+        self.queue_dict['txt_socket_queue'] = self.txt_socket_queue
 
         self.queue_dict["img_queue"] = self.img_queue
 

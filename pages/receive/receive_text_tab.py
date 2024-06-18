@@ -45,27 +45,27 @@ class TextTabWidget(QtWidgets.QWidget):
         self.receiveButton.clicked.connect(self.show_txt)
         # self.calculateButton.clicked.connect(self.show_gen_txt)
 
-    def open_file_dialog(self):
-        self.ge_text_edit.clear()
-        file_dialog = QFileDialog(self)
-        file_path, _ = file_dialog.getOpenFileName(self, "选择文件", "", "All Files (*)")
-        if file_path:
-            self.txt = file_path
-            print("选择的文件路径：", file_path)
-            self.show_txt(file_path)
+    # def open_file_dialog(self):
+    #     self.ge_text_edit.clear()
+    #     file_dialog = QFileDialog(self)
+    #     file_path, _ = file_dialog.getOpenFileName(self, "选择文件", "", "All Files (*)")
+    #     if file_path:
+    #         self.txt = file_path
+    #         print("选择的文件路径：", file_path)
+    #         self.show_txt(file_path)
 
-    def show_txt(self, file_path):
-        try:
-            with open(file_path, 'r', encoding='utf-8') as file:
-                content = file.read()[:-1].replace('\n', '\n\n') + "\n"
-                self.gt_text_edit.setPlainText(content)  # 将文件内容设置到QTextEdit中
-        except Exception as e:
-            print(f"Error reading file: {e}")
+    # def show_txt(self, file_path):
+    #     try:
+    #         with open(file_path, 'r', encoding='utf-8') as file:
+    #             content = file.read()[:-1].replace('\n', '\n\n') + "\n"
+    #             self.gt_text_edit.setPlainText(content)  # 将文件内容设置到QTextEdit中
+    #     except Exception as e:
+    #         print(f"Error reading file: {e}")
 
-    def send_txt(self):
-        if not self.txt == '':
-            self.txt_queue.put(self.txt)
-            self.txt = ''
+    # def send_txt(self):
+    #     if not self.txt == '':
+    #         self.txt_queue.put(self.txt)
+    #         self.txt = ''
 
     def show_txt(self):
         self.show_tra_gen_txt()

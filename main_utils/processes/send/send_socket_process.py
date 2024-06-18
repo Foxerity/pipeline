@@ -1,3 +1,4 @@
+import queue
 import socket
 import time
 
@@ -30,6 +31,7 @@ class SendSocketProcess(Pipeline):
             if not self.queue_dict['control_queue'].empty():
                 new_queue = self.queue_dict['control_queue'].get()
                 self.current_queue = new_queue
+                self.clear_queue()
             if self.current_queue and not self.current_queue.empty():
                 msg = self.current_queue.get_nowait()
                 self.send_message(msg)
@@ -37,3 +39,10 @@ class SendSocketProcess(Pipeline):
 
     def send_message(self, message):
         self.socket.sendall(message)
+
+    def clear_queue(self):
+        try:
+            while True:
+                self.current_queue.get_nowait()
+        except queue.Empty:
+            pass

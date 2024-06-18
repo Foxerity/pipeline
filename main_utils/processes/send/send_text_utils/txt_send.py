@@ -24,16 +24,16 @@ class Sender:
         self.end_idx = self.token_to_idx.get("<END>")
         self.deepsc = None
         self.txt_queue = None
-        self.txt_send_queue = None
+        self.txt_socket_queue = None
 
     def setup(self):
         self.deepsc = self.initialize_deepsc()
         self.load_checkpoint()
 
-    def run(self, txt_queue, txt_send_queue):
+    def run(self, txt_queue, txt_socket_queue):
         self.setup()
         self.txt_queue = txt_queue
-        self.txt_send_queue = txt_send_queue
+        self.txt_socket_queue = txt_socket_queue
         input_dir = txt_queue.get()
 
         # 读出文件夹中所有.txt文件的句子
@@ -42,7 +42,7 @@ class Sender:
         for single_sentence in process_sentences:
             cn_sentences, int_numbers, float_numbers = split_sentences([single_sentence])
             bit_stream = self.process_sentence(cn_sentences[0], int_numbers, float_numbers, single_sentence)
-            self.txt_send_queue.put(bit_stream)
+            self.txt_socket_queue.put(bit_stream)
 
     def parse_arguments(self):
         parser = argparse.ArgumentParser(description="Configuration for the Sender model.")

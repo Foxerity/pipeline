@@ -1,6 +1,6 @@
 import multiprocessing
 import sys
-from multiprocessing import Queue
+from multiprocessing import Queue, Manager
 from typing import Any, Union
 
 from PyQt5 import QtWidgets
@@ -29,6 +29,7 @@ class MainPage(QtWidgets.QMainWindow):
 
     def __init__(self, queue_dict):
         super(MainPage, self).__init__(flags=Qt.WindowFlags())
+        self.queue_dict = queue_dict
         # 创建主窗口的 QTabWidget
         self.tab_widget = QtWidgets.QTabWidget()
         self.init_main_UI()
@@ -59,6 +60,25 @@ class MainPage(QtWidgets.QMainWindow):
     def run(self):
         self.show()
 
+    def on_tab_changed(self, index):
+        print(f"Current tab index: {index}")
+        current_widget = self.tab_widget.currentWidget()
+        print(f"Current tab widget: {current_widget}")
+
+        # 执行不同的操作，根据当前选中的标签页
+        if index == 0:
+            print("Text Tab is selected")
+            queue_tuple = self.queue_dict['txt_socket_queue']
+            self.queue_dict['control_queue'].put(queue_tuple)
+        elif index == 1:
+            print("Image Tab is selected")
+        elif index == 2:
+            print("Static Video Tab is selected")
+            queue_tuple = self.queue_dict['static_socket_queue']
+            self.queue_dict['control_queue'].put(queue_tuple)
+        elif index == 3:
+            print("Stream Video Tab is selected")
+
 
 class MainWindow(Pipeline):
     queue_dict = {
@@ -70,21 +90,24 @@ class MainWindow(Pipeline):
 
     def __init__(self):
         super(MainWindow, self).__init__()
-        self.control_queue = Queue()
+        manager = Manager()
+        self.control_queue = manager.Queue()
 
-        self.txt_queue = Queue()
-        self.txt_send_queue = Queue()
+        self.txt_queue = manager.Queue()
+        self.txt_socket_queue = manager.Queue()
 
-        self.video_queue = Queue()
+        self.video_queue = manager.Queue()
+        self.static_socket_queue = manager.Queue()
 
-        self.camera_queue = Queue()
+        self.camera_queue = manager.Queue()
 
         self.queue_dict['control_queue'] = self.control_queue
 
         self.queue_dict['txt_proc'] = self.txt_queue
-        self.queue_dict['txt_send_queue'] = self.txt_send_queue
+        self.queue_dict['txt_socket_queue'] = self.txt_socket_queue
 
         self.queue_dict['static_vid_pro'] = self.video_queue
+        self.queue_dict['static_socket_queue'] = self.static_socket_queue
 
         self.queue_dict['stream_vid_pro'] = self.camera_queue
 

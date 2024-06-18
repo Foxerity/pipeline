@@ -25,31 +25,34 @@ class ReceiveSocketProcess(Pipeline):
 
     def connect(self):
         self.conn, self.addr = None, None
+
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.bind((self.host, self.port))
-        print(f'bind{self.host}:{self.port}')
         self.socket.listen(1)
+
         self.conn, self.addr = self.socket.accept()
-        print("accept.")
+        print(f'bind{self.host}:{self.port}')
 
     def run(self, **kwargs):
         self.connect()
+        data_length = None
         while True:
             if not self.queue_dict['control_queue'].empty():
-                new_queue = self.queue_dict['control_queue'].get()
+                data_length, new_queue = self.queue_dict['control_queue'].get()
                 self.current_queue = new_queue
                 self.clear_queue()
-                self.clean_channel()
+                self.clean_channel(data_length)
                 print(f"start putting data to {new_queue}")
-            data = self.receive_message()
+
+            data = self.receive_message(data_length)
 
             if data and self.current_queue:
                 self.current_queue.put(data)
             time.sleep(0.2)
 
-    def receive_message(self):
+    def receive_message(self, data_length):
         try:
-            data = self.conn.recv(1047)
+            data = self.conn.recv(data_length)
             if not data:
                 return None
             return data
@@ -57,12 +60,13 @@ class ReceiveSocketProcess(Pipeline):
             print(f"Socket error: {e}")
             return None
 
-    def clean_channel(self):
+    def clean_channel(self, data_length):
         self.conn.setblocking(False)
         while True:
             try:
-                data = self.conn.recv(1024)
+                self.conn.recv(data_length)
             except socket.error as e:
+                print(f"Socket error: {e}")
                 break
         self.conn.setblocking(True)
 
