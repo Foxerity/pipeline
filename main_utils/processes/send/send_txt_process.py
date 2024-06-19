@@ -21,7 +21,7 @@ class TxtProcess(Pipeline):
 
     def run(self, **kwargs):
         while True:
-            if not self.txt_queue.empty():
+            if self.txt_queue and not self.txt_queue.empty():
                 self.modules[0].run(self.txt_queue, self.txt_socket_queue)
             time.sleep(1)
 

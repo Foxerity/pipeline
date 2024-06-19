@@ -1,4 +1,6 @@
 import os
+import time
+
 import torch
 import json
 import argparse
@@ -44,6 +46,7 @@ class Receiver:
                 outputs = self.decode_signal(Rx_sig)
                 result_string = self.process_output(outputs)
                 self.save_result(result_string, total_int, total_float, tral_txt)
+            time.sleep(0.2)
 
     def parse_arguments(self):
         parser = argparse.ArgumentParser(description="Configuration for the Receiver model.")

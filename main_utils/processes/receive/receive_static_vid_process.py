@@ -21,7 +21,7 @@ class StaticVidProcess(Pipeline):
 
     def run(self, **kwargs):
         while True:
-            if not self.vid_obj_queue.empty():
+            if self.vid_obj_queue and not self.vid_obj_queue.empty():
                 self.model_name = self.vid_obj_queue.get()
                 dic = {
                     "model_name": self.model_name,

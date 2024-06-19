@@ -8,8 +8,8 @@ import torch
 from torch.utils.data import Dataset
 from torchvision import transforms
 
-from datasets import register
-from utils import to_pixel_samples
+from main_utils.processes.receive.receive_img_utils.datasets import register
+from main_utils.processes.receive.receive_img_utils.utils import to_pixel_samples
 
 
 @register('sr-implicit-paired')

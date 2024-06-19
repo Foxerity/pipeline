@@ -54,6 +54,7 @@ class StaticVidTab(QtWidgets.QWidget):
         self.start_playing(current_text)
 
     def receive_clicked(self):
+        print("receive_clicked!!!!")
         if not self.rece_vid_queue.empty():
             img = self.rece_vid_queue.get()
             self.display_single_image(img)

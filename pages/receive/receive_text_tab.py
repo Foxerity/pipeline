@@ -46,6 +46,8 @@ class TextTabWidget(QtWidgets.QWidget):
         # self.calculateButton.clicked.connect(self.show_gen_txt)
 
     def show_txt(self):
+        self.ge_text_edit.setPlainText('')
+        self.gt_text_edit.setPlainText('')
         self.show_tra_gen_txt()
         self.show_gen_txt()
 

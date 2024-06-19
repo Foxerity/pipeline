@@ -16,6 +16,8 @@ class ReceiveSocketProcess(Pipeline):
         self.queue_dict = None
         self.current_queue = None
 
+        self.count = None
+
     def setup(self, host, port, queue_dict, **kwargs):
         self.host = host
         self.port = port
@@ -32,27 +34,36 @@ class ReceiveSocketProcess(Pipeline):
 
         self.conn, self.addr = self.socket.accept()
         print(f'bind{self.host}:{self.port}')
+        self.count = 0
 
     def run(self, **kwargs):
         self.connect()
         data_length = None
+        self.clean_channel(1047)
         while True:
+
+            if data_length is not None:
+                data = self.receive_message(data_length)
+            else:
+                data = None
+
             if not self.queue_dict['control_queue'].empty():
+                print("ReceiveSocketProcess: queue changed.")
                 data_length, new_queue = self.queue_dict['control_queue'].get()
                 self.current_queue = new_queue
                 self.clear_queue()
                 self.clean_channel(data_length)
 
-            data = self.receive_message(data_length)
-            print(f"start getting {len(data)} data from {new_queue}")
-
-            if data and self.current_queue:
+            if data is not None and self.current_queue:
                 self.current_queue.put(data)
+                self.count += 1
+                print(f"ReceiveSocketProcess: put data {self.count}")
             time.sleep(0.2)
 
     def receive_message(self, data_length):
         try:
             data = self.conn.recv(data_length)
+            print('ReceiveSocketProcess: get data')
             if not data:
                 return None
             return data

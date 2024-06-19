@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from models import register
+from main_utils.processes.receive.receive_img_utils.models.models import register
 
 
 def default_conv(in_channels, out_channels, kernel_size, bias=True):

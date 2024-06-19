@@ -35,13 +35,12 @@ class MainPage(QtWidgets.QMainWindow):
         self.init_main_UI()
         # 加载并添加四个标签页, 分别对应文本、图像、静态视频、流式视频Tab
         self.tab_widget.addTab(TextTabWidget(self.pages_path[0], queue_dict['txt_proc']), "指令")
-        self.tab_widget.addTab(ImageTabWidget(self.pages_path[1]), "图像")
+        self.tab_widget.addTab(ImageTabWidget(self.pages_path[1], queue_dict['img_queue']), "图像")
         self.tab_widget.addTab(StaticVidTab(self.pages_path[2], queue_dict['static_vid_pro']), "静态视频")
         self.tab_widget.addTab(StreamVidTab(self.pages_path[3], queue_dict['stream_vid_pro']), "流式视频")
 
         self.tab_widget.currentChanged.connect(self.on_tab_changed)
         self.on_tab_changed(0)
-
 
     def init_main_UI(self):
         # 设置窗口位置和大小（x, y, width, height）
@@ -76,6 +75,8 @@ class MainPage(QtWidgets.QMainWindow):
             self.queue_dict['control_queue'].put(queue_tuple)
             print("putting txt_socket_queue")
         elif index == 1:
+            queue_tuple = self.queue_dict['img_socket_queue']
+            self.queue_dict['control_queue'].put(queue_tuple)
             print("Image Tab is selected")
         elif index == 2:
             print("Static Video Tab is selected")
@@ -101,6 +102,9 @@ class MainWindow(Pipeline):
         self.txt_queue = manager.Queue()
         self.txt_socket_queue = manager.Queue()
 
+        self.img_queue = manager.Queue()
+        self.img_socket_queue = manager.Queue()
+
         self.video_queue = manager.Queue()
         self.static_socket_queue = manager.Queue()
 
@@ -110,6 +114,9 @@ class MainWindow(Pipeline):
 
         self.queue_dict['txt_proc'] = self.txt_queue
         self.queue_dict['txt_socket_queue'] = self.txt_socket_queue
+
+        self.queue_dict['img_queue'] = self.img_queue
+        self.queue_dict['img_socket_queue'] = self.img_socket_queue
 
         self.queue_dict['static_vid_pro'] = self.video_queue
         self.queue_dict['static_socket_queue'] = self.static_socket_queue

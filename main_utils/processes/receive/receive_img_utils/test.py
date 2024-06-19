@@ -8,8 +8,9 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-import datasets
-import models, utils
+import main_utils.processes.receive.receive_img_utils.datasets as datasets
+import main_utils.processes.receive.receive_img_utils.models.models as models
+import main_utils.processes.receive.receive_img_utils.utils as utils
 
 
 def batched_predict(model, inp, coord, cell, bsize):

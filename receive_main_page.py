@@ -36,7 +36,7 @@ class MainPage(QtWidgets.QMainWindow):
                                              queue_dict['txt_queue'], queue_dict['txt_tral_queue']),
                                "指令")
 
-        self.tab_widget.addTab(ImageTabWidget(self.pages_path[1]),
+        self.tab_widget.addTab(ImageTabWidget(self.pages_path[1], queue_dict['img_queue']),
                                "图像")
 
         self.tab_widget.addTab(StaticVidTab(self.pages_path[2],
@@ -83,6 +83,8 @@ class MainPage(QtWidgets.QMainWindow):
             self.queue_dict['control_queue'].put(queue_tuple)
         elif index == 1:
             print("Image Tab is selected")
+            queue_tuple = (1047, self.queue_dict['img_socket_queue'])
+            self.queue_dict['control_queue'].put(queue_tuple)
         elif index == 2:
             print("Static Video Tab is selected")
             queue_tuple = (1047, self.queue_dict['static_socket_queue'])
@@ -113,6 +115,7 @@ class MainWindow(Pipeline):
         self.txt_socket_queue = manager.Queue()
 
         self.img_queue = manager.Queue()
+        self.img_socket_queue = manager.Queue()
 
         self.vid_obj_queue = manager.Queue()
         self.receive_queue = manager.Queue()
@@ -128,6 +131,7 @@ class MainWindow(Pipeline):
         self.queue_dict['txt_socket_queue'] = self.txt_socket_queue
 
         self.queue_dict["img_queue"] = self.img_queue
+        self.queue_dict["img_socket_queue"] = self.img_socket_queue
 
         self.queue_dict["vid_obj_queue"] = self.vid_obj_queue
         self.queue_dict["receive_queue"] = self.receive_queue
