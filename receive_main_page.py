@@ -108,6 +108,9 @@ class MainWindow(Pipeline):
 
     def __init__(self):
         super(MainWindow, self).__init__()
+        self.ProcessesControl = None
+        self.MainPage = None
+
         manager = Manager()
         self.control_queue = manager.Queue()
 
@@ -129,20 +132,18 @@ class MainWindow(Pipeline):
 
         self.init_queue_dict()
 
-        self.main_page = MainPage(self.queue_dict)
-
     def setup(self, **kwargs):
         self.modules = [
-            self.main_page,
+            MainPage(self.queue_dict),
             ProcessesControl()
         ]
-
-        self.modules[1].setup(self.queue_dict)
+        self.initialize_modules()
+        self.ProcessesControl.setup(self.queue_dict)
 
     def run(self, callbacks: Callback = None, **kwargs):
-        processes_control_process = multiprocessing.Process(target=self.modules[1].run)
+        processes_control_process = multiprocessing.Process(target=self.ProcessesControl.run)
         processes_control_process.start()
-        self.main_page.show()
+        self.MainPage.show()
 
     def init_queue_dict(self):
         self.queue_dict["control_queue"] = self.control_queue
@@ -166,6 +167,7 @@ class MainWindow(Pipeline):
 
 if __name__ == "__main__":
     import torch
+
     torch.multiprocessing.set_start_method('spawn')
     app = QtWidgets.QApplication(sys.argv)
     main = MainWindow()

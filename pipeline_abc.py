@@ -83,6 +83,16 @@ class Pipeline(ABC):
         """
         return [module.__class__.__name__ for module in self.modules if hasattr(module, "__call__")]
 
+    def initialize_modules(self):
+        for module in self.modules:
+            # 获取类名
+            class_name = module.__class__.__name__
+            # 转换为小写的类名
+            class_name_lower = class_name.lower()
+            # 将模块实例赋值给self的属性
+            setattr(self, class_name, module)
+            setattr(self, class_name_lower, module)
+
     def _get_module_config(self, module) -> Dict[str, Any]:
         """
         :param module:          Pipeline上会被保存在配置文件中的模块

@@ -35,11 +35,19 @@ class Receiver:
 
                 bit_stream = send_data_queue.get()
                 receive = bytes_to_list(bit_stream)
+                if len(receive[0][0]) == 0:
+                    self.receive_data_queue.put('? \n')
+                    self.txt_tral_queue.put('? \n')
+                    continue
                 Rx_sig, int_1, int_2, int_3, int_4, int_5, float_1, float_2, float_3, float_4, float_5, tral_txt = receive
                 Rx_sig = torch.tensor(Rx_sig).to(self.device)
-
-                total_int = most_frequent_element_int(torch.tensor(int_1), torch.tensor(int_2), torch.tensor(int_3),
-                                                      torch.tensor(int_4), torch.tensor(int_5))
+                try:
+                    total_int = most_frequent_element_int(torch.tensor(int_1), torch.tensor(int_2), torch.tensor(int_3),
+                                                          torch.tensor(int_4), torch.tensor(int_5))
+                except ValueError:
+                    self.receive_data_queue.put('? \n')
+                    self.txt_tral_queue.put('? \n')
+                    continue
                 total_float = most_frequent_element_float(torch.tensor(float_1), torch.tensor(float_2),
                                                           torch.tensor(float_3), torch.tensor(float_4),
                                                           torch.tensor(float_5))

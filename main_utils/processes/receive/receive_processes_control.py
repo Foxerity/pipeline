@@ -27,6 +27,7 @@ class ProcessesControl(Pipeline):
             StaticVidProcess(),
             StreamVidProcess(),
         ]
+        self.initialize_modules()
 
         self.modules[0].setup(self.config['host'], self.config['port'], queue_dict)
         self.modules[1].setup(queue_dict['txt_socket_queue'], queue_dict['txt_queue'], queue_dict['txt_trad_queue'])
