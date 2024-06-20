@@ -11,7 +11,7 @@ from PyQt5.QtCore import Qt, QTimer
 class StaticVidTab(QtWidgets.QWidget):
     def __init__(self, path, vid_obj_queue, rece_vid_queue):
         super(StaticVidTab, self).__init__(flags=Qt.WindowFlags())
-        self.gt_path = r'C:\Users\16070\Desktop\gt_videos'
+        self.gt_path = r'/home/samaritan/Desktop/videos'
         self.rece_vid_queue = rece_vid_queue
         self.vid_obj_queue = vid_obj_queue
 

@@ -165,6 +165,8 @@ class MainWindow(Pipeline):
 
 
 if __name__ == "__main__":
+    import torch
+    torch.multiprocessing.set_start_method('spawn')
     app = QtWidgets.QApplication(sys.argv)
     main = MainWindow()
     main.setup()
