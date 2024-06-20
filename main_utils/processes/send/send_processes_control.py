@@ -31,10 +31,10 @@ class ProcessesControl(Pipeline):
         ]
 
         self.modules[0].setup(self.config['host'], self.config['port'], self.queue_dict)
-        self.modules[1].setup(self.queue_dict['txt_proc'], self.queue_dict['txt_socket_queue'])
+        self.modules[1].setup(self.queue_dict['txt_queue'], self.queue_dict['txt_socket_queue'])
         self.modules[2].setup(self.queue_dict['img_queue'], self.queue_dict['img_socket_queue'])
-        # self.modules[3].setup(self.queue_dict['static_vid_pro'])
-        # self.modules[3].setup(self.queue_dict['stream_vid_pro'])
+        # self.modules[3].setup(self.queue_dict['static_vid_queue'])
+        # self.modules[3].setup(self.queue_dict['stream_vid_queue'])
 
     def run(self, **kwargs):
         socket_process = multiprocessing.Process(target=self.modules[0].run)

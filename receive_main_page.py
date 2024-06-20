@@ -33,14 +33,14 @@ class MainPage(QtWidgets.QMainWindow):
         self.initUI()
         # 加载并添加四个标签页, 分别对应文本、图像、静态视频、流式视频Tab
         self.tab_widget.addTab(TextTabWidget(self.pages_path[0],
-                                             queue_dict['txt_queue'], queue_dict['txt_tral_queue']),
+                                             queue_dict['txt_queue'], queue_dict['txt_trad_queue']),
                                "指令")
 
-        self.tab_widget.addTab(ImageTabWidget(self.pages_path[1], queue_dict['img_queue']),
+        self.tab_widget.addTab(ImageTabWidget(self.pages_path[1], queue_dict['img_queue'], queue_dict["img_tra_queue"]),
                                "图像")
 
         self.tab_widget.addTab(StaticVidTab(self.pages_path[2],
-                                            queue_dict['vid_obj_queue'], queue_dict['receive_queue']),
+                                            queue_dict['vid_obj_queue'], queue_dict['rec_queue']),
                                "静态视频")
 
         self.tab_widget.addTab(StreamVidTab(self.pages_path[3],
@@ -67,7 +67,7 @@ class MainPage(QtWidgets.QMainWindow):
     def initUI(self):
         # 设置窗口位置和大小(x, y, width, height)
         self.setGeometry(800, 800, 1600, 1000)
-        self.setWindowTitle('水下通信演示系统')
+        self.setWindowTitle('水下通信演示系统——接收端')
 
         self.setCentralWidget(self.tab_widget)
 
@@ -96,7 +96,8 @@ class MainPage(QtWidgets.QMainWindow):
 class MainWindow(Pipeline):
     queue_dict = {
         "txt_queue": Union[Queue, Any],
-        "txt_tral_queue": Union[Queue, Any],
+        "txt_trad_queue": Union[Queue, Any],
+        "txt_socket_queue": Union[Queue, Any],
 
         "img_queue": Union[Queue, Any],
 
@@ -111,34 +112,22 @@ class MainWindow(Pipeline):
         self.control_queue = manager.Queue()
 
         self.txt_queue = manager.Queue()
-        self.txt_tral_queue = manager.Queue()
+        self.txt_trad_queue = manager.Queue()
         self.txt_socket_queue = manager.Queue()
 
         self.img_queue = manager.Queue()
+        self.img_tra_queue = manager.Queue()
         self.img_socket_queue = manager.Queue()
 
         self.vid_obj_queue = manager.Queue()
-        self.receive_queue = manager.Queue()
+        self.rec_queue = manager.Queue()
         self.static_socket_queue = manager.Queue()
 
         self.skeleton_queue = manager.Queue()
         self.generation_queue = manager.Queue()
+        self.stream_socket_queue = manager.Queue()
 
-        self.queue_dict["control_queue"] = self.control_queue
-
-        self.queue_dict["txt_queue"] = self.txt_queue
-        self.queue_dict["txt_tral_queue"] = self.txt_tral_queue
-        self.queue_dict['txt_socket_queue'] = self.txt_socket_queue
-
-        self.queue_dict["img_queue"] = self.img_queue
-        self.queue_dict["img_socket_queue"] = self.img_socket_queue
-
-        self.queue_dict["vid_obj_queue"] = self.vid_obj_queue
-        self.queue_dict["receive_queue"] = self.receive_queue
-        self.queue_dict["static_socket_queue"] = self.static_socket_queue
-
-        self.queue_dict["skeleton_queue"] = self.skeleton_queue
-        self.queue_dict["generation_queue"] = self.generation_queue
+        self.init_queue_dict()
 
         self.main_page = MainPage(self.queue_dict)
 
@@ -154,6 +143,25 @@ class MainWindow(Pipeline):
         processes_control_process = multiprocessing.Process(target=self.modules[1].run)
         processes_control_process.start()
         self.main_page.show()
+
+    def init_queue_dict(self):
+        self.queue_dict["control_queue"] = self.control_queue
+
+        self.queue_dict["txt_queue"] = self.txt_queue
+        self.queue_dict["txt_trad_queue"] = self.txt_trad_queue
+        self.queue_dict['txt_socket_queue'] = self.txt_socket_queue
+
+        self.queue_dict["img_queue"] = self.img_queue
+        self.queue_dict["img_tra_queue"] = self.img_tra_queue
+        self.queue_dict["img_socket_queue"] = self.img_socket_queue
+
+        self.queue_dict["vid_obj_queue"] = self.vid_obj_queue
+        self.queue_dict["rec_queue"] = self.rec_queue
+        self.queue_dict["static_socket_queue"] = self.static_socket_queue
+
+        self.queue_dict["skeleton_queue"] = self.skeleton_queue
+        self.queue_dict["generation_queue"] = self.generation_queue
+        self.queue_dict["stream_socket_queue"] = self.stream_socket_queue
 
 
 if __name__ == "__main__":

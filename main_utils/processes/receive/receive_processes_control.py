@@ -11,21 +11,10 @@ from main_utils.processes.receive.receive_socket_process import ReceiveSocketPro
 class ProcessesControl(Pipeline):
     def __init__(self):
         super().__init__()
-        self.txt_queue = None
-        self.txt_tral_queue = None
-        self.txt_socket_queue = None
-
-        self.img_queue = None
-        self.img_socket_queue = None
-
-        self.vid_obj_queue = None
-        self.rece_vid_queue = None
-        self.socket_queue = None
-
-        self.skeleton_queue = None
-        self.generation_queue = None
+        self.queue_dict = None
 
     def setup(self, queue_dict, **kwargs):
+        self.queue_dict = queue_dict
         self.config = {
             # 'host': '192.168.2.137',
             'host': '127.0.0.1',
@@ -39,25 +28,11 @@ class ProcessesControl(Pipeline):
             StreamVidProcess(),
         ]
 
-        self.txt_queue = queue_dict['txt_queue']
-        self.txt_tral_queue = queue_dict['txt_tral_queue']
-        self.txt_socket_queue = queue_dict['txt_socket_queue']
-
-        self.img_queue = queue_dict['img_queue']
-        self.img_socket_queue = queue_dict['img_socket_queue']
-
-        self.vid_obj_queue = queue_dict['vid_obj_queue']
-        self.rece_vid_queue = queue_dict['receive_queue']
-        self.socket_queue = queue_dict['static_socket_queue']
-
-        self.skeleton_queue = queue_dict['skeleton_queue']
-        self.generation_queue = queue_dict['generation_queue']
-
         self.modules[0].setup(self.config['host'], self.config['port'], queue_dict)
-        self.modules[1].setup(self.txt_socket_queue, self.txt_queue, self.txt_tral_queue)
-        self.modules[2].setup(self.img_queue, self.img_socket_queue)
-        # self.modules[3].setup(self.vid_obj_queue, self.rece_vid_queue, self.socket_queue)
-        # self.modules[4].setup(self.skeleton_queue, self.generation_queue)
+        self.modules[1].setup(queue_dict['txt_socket_queue'], queue_dict['txt_queue'], queue_dict['txt_trad_queue'])
+        self.modules[2].setup(queue_dict['img_queue'], queue_dict["img_tra_queue"], queue_dict['img_socket_queue'])
+        # self.modules[3].setup(queue_dict['vid_obj_queue'], queue_dict['rec_queue'], queue_dict['static_socket_queue'])
+        # self.modules[4].setup(queue_dict['skeleton_queue'], queue_dict['generation_queue'])
 
     def run(self, **kwargs):
         print("creating subprocesses.")

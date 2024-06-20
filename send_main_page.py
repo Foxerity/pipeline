@@ -1,4 +1,3 @@
-import multiprocessing
 import sys
 from multiprocessing import Queue, Manager
 from typing import Any, Union
@@ -34,10 +33,10 @@ class MainPage(QtWidgets.QMainWindow):
         self.tab_widget = QtWidgets.QTabWidget()
         self.init_main_UI()
         # 加载并添加四个标签页, 分别对应文本、图像、静态视频、流式视频Tab
-        self.tab_widget.addTab(TextTabWidget(self.pages_path[0], queue_dict['txt_proc']), "指令")
+        self.tab_widget.addTab(TextTabWidget(self.pages_path[0], queue_dict['txt_queue']), "指令")
         self.tab_widget.addTab(ImageTabWidget(self.pages_path[1], queue_dict['img_queue']), "图像")
-        self.tab_widget.addTab(StaticVidTab(self.pages_path[2], queue_dict['static_vid_pro']), "静态视频")
-        self.tab_widget.addTab(StreamVidTab(self.pages_path[3], queue_dict['stream_vid_pro']), "流式视频")
+        self.tab_widget.addTab(StaticVidTab(self.pages_path[2], queue_dict['static_vid_queue']), "静态视频")
+        self.tab_widget.addTab(StreamVidTab(self.pages_path[3], queue_dict['stream_vid_queue']), "流式视频")
 
         self.tab_widget.currentChanged.connect(self.on_tab_changed)
         self.on_tab_changed(0)
@@ -45,7 +44,7 @@ class MainPage(QtWidgets.QMainWindow):
     def init_main_UI(self):
         # 设置窗口位置和大小（x, y, width, height）
         self.setGeometry(800, 800, 1600, 1000)
-        self.setWindowTitle('Set Geometry Example')
+        self.setWindowTitle('水下通信演示系统——发送端')
 
         self.setCentralWidget(self.tab_widget)
         self.tab_widget.setStyleSheet("""
@@ -88,40 +87,39 @@ class MainPage(QtWidgets.QMainWindow):
 
 class MainWindow(Pipeline):
     queue_dict = {
-        "txt_proc": Union[Queue, Any],
-        "img_proc": Union[Queue, Any],
-        "static_vid_pro": Union[Queue, Any],
-        "stream_vid_pro": Union[Queue, Any],
+        "control_queue": Union[Queue, Any],
+
+        "txt_queue": Union[Queue, Any],
+        "txt_socket_queue": Union[Queue, Any],
+
+        "img_queue": Union[Queue, Any],
+        "img_socket_queue": Union[Queue, Any],
+
+        "static_vid_queue": Union[Queue, Any],
+        "static_socket_queue": Union[Queue, Any],
+
+        "stream_vid_queue": Union[Queue, Any],
+        "stream_socket_queue": Union[Queue, Any],
     }
 
     def __init__(self):
         super(MainWindow, self).__init__()
         manager = Manager()
-        self.control_queue = manager.Queue()
+        self.control_queue = manager.Queue()                # 控制socket传输哪个队列的数据
 
-        self.txt_queue = manager.Queue()
-        self.txt_socket_queue = manager.Queue()
+        self.txt_queue = manager.Queue()                    # 文本：UI与进程通信，选择的文本
+        self.txt_socket_queue = manager.Queue()             # 文本：进程与socket通信，传输具体的文本
 
-        self.img_queue = manager.Queue()
-        self.img_socket_queue = manager.Queue()
+        self.img_queue = manager.Queue()                    # 图像：UI与进程通信，选择的图片
+        self.img_socket_queue = manager.Queue()             # 图像：进程与socket通信，传输具体的图片patch
 
-        self.video_queue = manager.Queue()
-        self.static_socket_queue = manager.Queue()
+        self.video_queue = manager.Queue()                  # 静态视频：UI与进程通信，选择的视频
+        self.static_socket_queue = manager.Queue()          # 静态视频：进程与socket通信，传输具体的视频帧
 
-        self.camera_queue = manager.Queue()
+        self.camera_queue = manager.Queue()                 # 动态视频：UI与进程通信，摄像头传来的图片
+        self.stream_socket_queue = manager.Queue()          # 动态视频：进程与socket通信，传输具体的图片
 
-        self.queue_dict['control_queue'] = self.control_queue
-
-        self.queue_dict['txt_proc'] = self.txt_queue
-        self.queue_dict['txt_socket_queue'] = self.txt_socket_queue
-
-        self.queue_dict['img_queue'] = self.img_queue
-        self.queue_dict['img_socket_queue'] = self.img_socket_queue
-
-        self.queue_dict['static_vid_pro'] = self.video_queue
-        self.queue_dict['static_socket_queue'] = self.static_socket_queue
-
-        self.queue_dict['stream_vid_pro'] = self.camera_queue
+        self.init_queue_dict()                              # 将全部队列管理为字典
 
         self.main_page = MainPage(self.queue_dict)
 
@@ -138,6 +136,21 @@ class MainWindow(Pipeline):
     def run(self, callbacks: Callback = None, **kwargs):
         for module in self.modules:
             module.run()
+
+    def init_queue_dict(self):
+        self.queue_dict['control_queue'] = self.control_queue
+
+        self.queue_dict['txt_queue'] = self.txt_queue
+        self.queue_dict['txt_socket_queue'] = self.txt_socket_queue
+
+        self.queue_dict['img_queue'] = self.img_queue
+        self.queue_dict['img_socket_queue'] = self.img_socket_queue
+
+        self.queue_dict['static_vid_queue'] = self.video_queue
+        self.queue_dict['static_socket_queue'] = self.static_socket_queue
+
+        self.queue_dict['stream_vid_queue'] = self.camera_queue
+        self.queue_dict['stream_socket_queue'] = self.stream_socket_queue
 
 
 if __name__ == "__main__":
