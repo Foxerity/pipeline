@@ -1,6 +1,6 @@
 import sys
 
-sys.path.append(r'D:\project\pipeline\main_utils\processes\send\send_text_utils')
+sys.path.append(r'/home/samaritan/Desktop/pipeline_final/pipeline/main_utils/processes/send/send_text_utils')
 import os
 import json
 import torch
@@ -47,11 +47,11 @@ class Sender:
 
     def parse_arguments(self):
         parser = argparse.ArgumentParser(description="Configuration for the Sender model.")
-        parser.add_argument('--vocab-file', default=r'D:\project\pipeline\main_utils\processes\send\send_text_utils/europarl/vocab.json',
+        parser.add_argument('--vocab-file', default=r'/home/samaritan/Desktop/pipeline_final/pipeline/main_utils/processes/send/send_text_utils/europarl/vocab.json',
                             type=str,
                             help='Path to the vocabulary file.')
         parser.add_argument('--checkpoint-path',
-                            default=r'D:\project\pipeline\main_utils\processes\send\send_text_utils/checkpoints/deepsc-AWGN', type=str,
+                            default=r'/home/samaritan/Desktop/pipeline_final/pipeline/main_utils/processes/send/send_text_utils/checkpoints/deepsc-AWGN', type=str,
                             help='Path to the checkpoint directory.')
         parser.add_argument('--channel', default='AWGN', type=str, help='Channel type.')
         parser.add_argument('--MAX-LENGTH', default=50, type=int, help='Maximum sequence length.')
@@ -69,7 +69,7 @@ class Sender:
         return torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
     def load_vocab(self, vocab_file):
-        vocab_file = r"D:\project\pipeline\main_utils\processes\send\send_text_utils\europarl\vocab.json"
+        vocab_file = r"/home/samaritan/Desktop/pipeline_final/pipeline/main_utils/processes/send/send_text_utils/europarl/vocab.json"
         with open(vocab_file, 'r', encoding='utf-8') as file:
             vocab = json.load(file)
         token_to_idx = vocab['token_to_idx']

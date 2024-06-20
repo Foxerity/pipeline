@@ -43,7 +43,7 @@ parser.add_argument('--num-heads', default=8, type=int)
 # 加载词典
 args = parser.parse_args()
 args.vocab_file = './' + args.vocab_file
-args.vocab_file = r"D:\project\pipeline\main_utils\processes\send\send_text_utils\europarl\vocab.json"
+args.vocab_file = r"/home/samaritan/Desktop/pipeline_final/pipeline/main_utils/processes/send/send_text_utils/europarl/vocab.json"
 vocab = json.load(open(args.vocab_file, 'rb'))
 token_to_idx = vocab['token_to_idx']
 idx_to_token = dict(zip(token_to_idx.values(), token_to_idx.keys()))
@@ -599,18 +599,133 @@ def split_sentences(sentences):
     return results, int_numbers, float_numbers
 
 
+# def list_to_bytes(lst):
+#     # 将列表转换为JSON字符串
+#     pickle_str = pickle.dumps(lst)
+#     # 将JSON字符串转换为字节流
+#     byte_stream = gzip.compress(pickle_str)
+#     return byte_stream
+
+
+# def bytes_to_list(byte_stream):
+#     # 将字节流解码为JSON字符串
+#     pickle_str = gzip.decompress(byte_stream)
+#     # 将JSON字符串解析为列表对象
+#     lst = pickle.loads(pickle_str)
+#     return lst
+
+def list_2_to_byte_stream(two_d_list):
+    byte_stream = b''
+    for row in two_d_list:
+        for num in row:
+            byte_stream += struct.pack('>f', num)  # 大端模式的32位浮点数
+    return byte_stream
+
+
+def byte_stream_to_list_2(byte_stream, num_sublists, num_elements_per_sublist):
+    num_bytes_per_element = 4  # 32位浮点数占用4字节
+    recovered_2d_list = []
+
+    for _ in range(num_sublists):
+        row = []
+        for _ in range(num_elements_per_sublist):
+            bytes_chunk = byte_stream[:num_bytes_per_element]
+            row.append(struct.unpack('>f', bytes_chunk)[0])
+            byte_stream = byte_stream[num_bytes_per_element:]
+        recovered_2d_list.append(row)
+
+    return recovered_2d_list
+
+
+def pad_byte_stream(byte_stream, target_length):
+    padding_length = target_length - len(byte_stream)
+
+    if padding_length > 0:
+        padding = b'\x00' * padding_length
+        padded_byte_stream = byte_stream + padding
+    else:
+        padded_byte_stream = byte_stream  # 不需要补充，直接返回原始字节流
+
+    return padded_byte_stream
+
+
+def bits_to_floats(bit_stream):
+    # 确保比特流长度是4的倍数
+    if len(bit_stream) % 32 != 0:
+        raise ValueError("比特流长度不是32的倍数")
+
+    # 将比特流分割成每32位一组的子串
+    bit_chunks = [bit_stream[i:i+32] for i in range(0, len(bit_stream), 32)]
+
+    # 将每组子串转换为浮点数
+    recovered_floats = []
+    for bit_chunk in bit_chunks:
+        # 将二进制字符串转换为整数，然后转换为4字节的字节串
+        bytes_chunk = bytes(int(bit_chunk, 2).to_bytes(4, byteorder='big'))
+        # 解析字节串为浮点数
+        float_value = struct.unpack('>f', bytes_chunk)[0]
+        recovered_floats.append(float_value)
+
+    return recovered_floats
+
+
+def remove_from_first_zero(byte_stream):
+    # 查找第一个字节0的位置
+    zero_index = byte_stream.find(b'\x00')
+
+    # 如果找到了字节0，删除它以及之后的所有内容
+    if zero_index != -1:
+        modified_byte_stream = byte_stream[:zero_index]
+    else:
+        # 如果没有找到字节0，返回原始字节流
+        modified_byte_stream = byte_stream
+
+    return modified_byte_stream
+
+
 def list_to_bytes(lst):
-    # 将列表转换为JSON字符串
-    pickle_str = pickle.dumps(lst)
-    # 将JSON字符串转换为字节流
-    byte_stream = gzip.compress(pickle_str)
+    Tx_sig, int_1, int_2, int_3,int_4, int_5, float_1, float_2, float_3, float_4, float_5, str_1 = lst
+    byte_Tx_sig = list_2_to_byte_stream(Tx_sig[0])
+    byte_Tx_sig = pad_byte_stream(byte_Tx_sig, 608)
+    byte_int_1 = b''.join(struct.pack('>f', num) for num in int_1)
+    byte_int_1 = pad_byte_stream(byte_int_1, 24)
+    byte_int_2 = b''.join(struct.pack('>f', num) for num in int_2)
+    byte_int_2 = pad_byte_stream(byte_int_2, 24)
+    byte_int_3 = b''.join(struct.pack('>f', num) for num in int_3)
+    byte_int_3 = pad_byte_stream(byte_int_3, 24)
+    byte_int_4 = b''.join(struct.pack('>f', num) for num in int_4)
+    byte_int_4 = pad_byte_stream(byte_int_4, 24)
+    byte_int_5 = b''.join(struct.pack('>f', num) for num in int_5)
+    byte_int_5 = pad_byte_stream(byte_int_5, 24)
+    byte_float_1 = b''.join(struct.pack('>f', num) for num in float_1)
+    byte_float_1 = pad_byte_stream(byte_float_1, 4)
+    byte_float_2 = b''.join(struct.pack('>f', num) for num in float_2)
+    byte_float_2 = pad_byte_stream(byte_float_2, 4)
+    byte_float_3 = b''.join(struct.pack('>f', num) for num in float_3)
+    byte_float_3 = pad_byte_stream(byte_float_3, 4)
+    byte_float_4 = b''.join(struct.pack('>f', num) for num in float_4)
+    byte_float_4 = pad_byte_stream(byte_float_4, 4)
+    byte_float_5 = b''.join(struct.pack('>f', num) for num in float_5)
+    byte_float_5 = pad_byte_stream(byte_float_5, 4)
+    byte_str = str_1.encode('utf-8')
+    byte_stream = byte_Tx_sig + byte_int_1 + byte_int_2 + byte_int_3 + byte_int_4 + byte_int_5 + byte_float_1 + byte_float_2 + byte_float_3 + byte_float_4 + byte_float_5 + byte_str
+
     return byte_stream
 
 
 def bytes_to_list(byte_stream):
-    # 将字节流解码为JSON字符串
-    pickle_str = gzip.decompress(byte_stream)
-    # 将JSON字符串解析为列表对象
-    lst = pickle.loads(pickle_str)
+    first = remove_from_first_zero(byte_stream[0:608])
+    Rx_sig = [byte_stream_to_list_2(first, len(first) // 16, 4)]
+    int_1 = bits_to_floats(''.join(f'{byte:08b}' for byte in byte_stream[608:632]))
+    int_2 = bits_to_floats(''.join(f'{byte:08b}' for byte in byte_stream[632:656]))
+    int_3 = bits_to_floats(''.join(f'{byte:08b}' for byte in byte_stream[656:680]))
+    int_4 = bits_to_floats(''.join(f'{byte:08b}' for byte in byte_stream[680:704]))
+    int_5 = bits_to_floats(''.join(f'{byte:08b}' for byte in byte_stream[704:728]))
+    float_1 = bits_to_floats(''.join(f'{byte:08b}' for byte in byte_stream[728:732]))
+    float_2 = bits_to_floats(''.join(f'{byte:08b}' for byte in byte_stream[732:736]))
+    float_3 = bits_to_floats(''.join(f'{byte:08b}' for byte in byte_stream[736:740]))
+    float_4 = bits_to_floats(''.join(f'{byte:08b}' for byte in byte_stream[740:744]))
+    float_5 = bits_to_floats(''.join(f'{byte:08b}' for byte in byte_stream[744:748]))
+    str_1 = byte_stream[748:].decode('utf-8', errors='replace')
+    lst = [Rx_sig, int_1, int_2, int_3, int_4, int_5, float_1, float_2, float_3, float_4, float_5, str_1]
     return lst
-

@@ -47,7 +47,7 @@ def reconstruct_image(chunks):
 def super_resolution(image):
     img = transforms.ToTensor()(image.convert('RGB'))
 
-    model = models.make(torch.load("D:\project\pipeline\main_utils\processes/receive/receive_img_utils/rdn-liif.pth")['model'], load_sd=True).cuda()
+    model = models.make(torch.load("/home/samaritan/Desktop/pipeline_final/pipeline/main_utils/processes/receive/receive_img_utils/rdn-liif.pth")['model'], load_sd=True).cuda()
 
     h, w = list(map(int, '2048,2048'.split(',')))
     coord = make_coord((h, w)).cuda()

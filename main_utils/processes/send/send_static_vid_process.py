@@ -7,7 +7,7 @@ from PIL import Image
 from callback.callback import Callback
 from pipeline_abc import Pipeline
 
-# from main_utils.processes.send.send_utils.main import parse_args, HandleVideo, HandleVideoDynamic
+from main_utils.processes.send.send_utils.main import parse_args, HandleVideo, HandleVideoDynamic
 
 
 class StaticVidProcess(Pipeline):
@@ -15,39 +15,20 @@ class StaticVidProcess(Pipeline):
         super().__init__()
         self.path = None
         self.video_queue = None
-        self.handle_video = None
-        self.host = None
-        self.port = None
+        self.socket_queue = None
 
-    def setup(self, video_queue, path, host, port, **kwargs):
+    def setup(self, path, video_queue, video_socket_queue, **kwargs):
         self.path = path
-        self.host = host
-        self.port = port
 
         self.video_queue = video_queue
-        # self.handle_video = HandleVideo()
-        # self.handle_video_dynamic = HandleVideoDynamic()
+        self.video_socket_queue = video_socket_queue
+
+        self.modules = [
+            HandleVideo(),
+            HandleVideoDynamic()
+        ]
 
     def run(self, callbacks: Callback = None, **kwargs):
-        from main_utils.processes.send.send_utils.main import parse_args, handle_video
-
-        # object_list = ["海底黄色", "sea_yellowbox",
-        #                "海底渔船", "sea_ship",
-        #                "海底潜艇", "sea_submarine",
-        #                "黄色", "yellow",
-        #                "鱼雷", "torpedo",
-        #                "潜艇", "submarine",
-        #                "渔船", "fish_ship",
-        #                "水雷", "mine",
-        #                "双色", "two",
-        #                "乌龟", "tortoise",
-        #                "动态鱼", "fishes",
-        #                "UUV",
-        #                "潜航器", "vehicle",
-        #                "鲨鱼", "shark",
-        #                "桥墩", "pier",
-        #                "检测器", "detector",
-        #                "仿生鱼", "bionic"]
 
         while True:
             if not self.video_queue.empty():
@@ -186,10 +167,10 @@ class StaticVidProcess(Pipeline):
                 args = parse_args(command)
 
                 if args.dynamic:
-                    self.handle_video_dynamic(args, self.host, self.port)
-                    self.handle_video_dynamic.run()
+                    self.modules[1].setup(args)
+                    self.modules[1].run(self.video_socket_queue)
                 else:
-                    self.handle_video.setup(args, self.host, self.port)
-                    self.handle_video.run()
+                    self.modules[0].setup(args)
+                    self.modules[0].run(self.video_socket_queue)
 
             time.sleep(2)

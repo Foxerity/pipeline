@@ -33,7 +33,7 @@ class ProcessesControl(Pipeline):
         self.modules[0].setup(self.config['host'], self.config['port'], self.queue_dict)
         self.modules[1].setup(self.queue_dict['txt_queue'], self.queue_dict['txt_socket_queue'])
         self.modules[2].setup(self.queue_dict['img_queue'], self.queue_dict['img_socket_queue'])
-        # self.modules[3].setup(self.queue_dict['static_vid_queue'])
+        self.modules[3].setup(self.config['path'], self.queue_dict['static_vid_queue'], self.queue_dict['static_socket_queue'])
         # self.modules[3].setup(self.queue_dict['stream_vid_queue'])
 
     def run(self, **kwargs):
@@ -46,8 +46,8 @@ class ProcessesControl(Pipeline):
         img_process = multiprocessing.Process(target=self.modules[2].run)
         img_process.start()
 
-        # static_vid_process = multiprocessing.Process(target=self.modules[3].run)
-        # static_vid_process.start()
+        static_vid_process = multiprocessing.Process(target=self.modules[3].run)
+        static_vid_process.start()
 
         # stream_vid_process = multiprocessing.Process(target=self.modules[3].run)
         # stream_vid_process.start()
