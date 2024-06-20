@@ -1,8 +1,12 @@
+import multiprocessing
 import queue
+import random
 import socket
 import time
 
 from pipeline_abc import Pipeline
+from main_utils.processes.receive.receive_socket_utils.receive_chanel_effect import ReceiveChannelEffect
+from main_utils.processes.receive.receive_socket_utils.receive_logger import ByteStreamSaver
 
 
 class ReceiveSocketProcess(Pipeline):
@@ -16,25 +20,50 @@ class ReceiveSocketProcess(Pipeline):
         self.queue_dict = None
         self.current_queue = None
 
-        self.count = None
+        self.lock = None
+        self.cache_list = None
+
+        self.byte_saver = None
+
+        self.raw_count = None
+        self.noise_count = None
+
+        self.effect_bytes = None
+        self.put_data_queue = None
+        self.get_data_queue = None
 
     def setup(self, host, port, queue_dict, **kwargs):
         self.host = host
         self.port = port
         self.socket = None
+
         self.queue_dict = queue_dict
         self.current_queue = None
 
+        self.byte_saver = ByteStreamSaver()
+        self.effect_bytes = ReceiveChannelEffect()
+        self.put_data_queue = multiprocessing.Queue()
+        self.get_data_queue = multiprocessing.Queue()
+
+        self.cache_list = []
+
     def connect(self):
         self.conn, self.addr = None, None
+        self.effect_bytes.setup()
+        effect_socket = multiprocessing.Process(target=self.effect_bytes.fun, args=(self.put_data_queue,
+                                                                                    self.get_data_queue))
+        effect_socket.start()
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
         self.socket.bind((self.host, self.port))
         self.socket.listen(1)
 
         self.conn, self.addr = self.socket.accept()
+        self.conn.setblocking(False)
         print(f'bind{self.host}:{self.port}')
-        self.count = 0
+        self.raw_count = 0
+        self.noise_count = 0
 
     def run(self, **kwargs):
         self.connect()
@@ -55,10 +84,18 @@ class ReceiveSocketProcess(Pipeline):
                 self.clean_channel(data_length)
 
             if data is not None and self.current_queue:
+                print("ReceiveSocketProcess: effect data.")
+                self.put_data_queue.put(data)
+                self.raw_count += 1
+                self.byte_saver.save_byte_stream(data, f"raw_{self.raw_count}.txt")
+
+            if not self.get_data_queue.empty():
+                data = self.get_data_queue.get()
+                self.noise_count += 1
+                self.byte_saver.save_byte_stream(data, f"noise_{self.noise_count}.txt")
                 self.current_queue.put(data)
-                self.count += 1
-                print(f"ReceiveSocketProcess: put data {self.count}")
-            time.sleep(0.2)
+                print(f"ReceiveSocketProcess: put noise data {self.noise_count} to ui")
+            time.sleep(0.1)
 
     def receive_message(self, data_length):
         try:
@@ -68,7 +105,6 @@ class ReceiveSocketProcess(Pipeline):
                 return None
             return data
         except socket.error as e:
-            print(f"receive_message: Socket error: {e}")
             return None
 
     def clean_channel(self, data_length):
@@ -79,7 +115,7 @@ class ReceiveSocketProcess(Pipeline):
             except socket.error as e:
                 print(f"clean_channel: Socket error: {e}")
                 break
-        self.conn.setblocking(True)
+        # self.conn.setblocking(True)
 
     def clear_queue(self):
         try:
