@@ -37,15 +37,30 @@ class Receiver:
 
     def run(self, send_data_queue, receive_data_queue, txt_tral_queue, txt_value_queue):
         self.setup()
+        ber_list = []
         flag = 0
+        bit_start = 0
+        bit_end = 0
         while True:
             if not send_data_queue.empty():
                 self.receive_data_queue = receive_data_queue
                 self.txt_tral_queue = txt_tral_queue
+                send_bit = self.send_bits()
                 start_time = time.time()
                 bit_stream = send_data_queue.get()
                 end_time = time.time()
                 delay_time = end_time - start_time
+                bits_stream = ''.join(format(byte, '08b') for byte in bit_stream)
+                # 误码率
+                bit_end += len(bits_stream)
+                count = self.count_matching_bits(send_bit[bit_start:bit_end], bits_stream)
+                ber = (len(bits_stream) - count) / len(bits_stream)
+
+                bit_start = bit_end
+                if bit_start == bit_end:
+                    bit_start = 0
+                    bit_end = 0
+                self.value_dict["ber_ratio"] = float(ber)
                 # 比特率
                 self.value_dict["bit_ratio"] = len(bit_stream)/delay_time
                 # 丢包率
@@ -56,6 +71,9 @@ class Receiver:
                     flag = 1
                     continue
                 self.value_dict["recevie_packet_count"] += 1
+
+
+                ber_list.append(ber)
 
                 receive = bytes_to_list(bit_stream)
                 if len(receive[0][0]) == 0:
@@ -78,9 +96,10 @@ class Receiver:
                 result_string = self.process_output(outputs)
                 self.save_result(result_string, total_int, total_float, tral_txt)
                 txt_value_queue.put(self.value_dict)
+                self.value_dict["mean_ber_ratio"] = sum(ber_list) / len(ber_list)
             time.sleep(0.2)
         self.value_dict["loss_packet"] = (self.value_dict["send_packet_count"] - self.value_dict["recevie_packet_count"])/self.value_dict["send_packet_count"]
-
+        txt_value_queue.put(self.value_dict)
     def parse_arguments(self):
         parser = argparse.ArgumentParser(description="Configuration for the Receiver model.")
         parser.add_argument('--vocab-file', default='main_utils/processes/send/send_text_utils/europarl/vocab.json', type=str, help='Path to the vocabulary file.')
@@ -161,11 +180,24 @@ class Receiver:
     def save_result(self, result_string, total_int, total_float, tral_txt):
         final = replace_and_return(result_string, total_int, total_float)
         file_contents = "".join(final[0]).replace("， ", "，") + "\n"
+        file_contents = file_contents.replace(" ", "")
 
         if file_contents.strip():  # Check if file_contents is not just whitespace or empty
             self.receive_data_queue.put(file_contents)
             self.txt_tral_queue.put(tral_txt)
 
+    def send_bits(self):
+        with open("send_bits.txt", 'r') as file:
+            send_bit_stream = file.read()
+        return send_bit_stream
+
+    def count_matching_bits(self, str1, str2):
+        # 确保两个字符串的长度相同
+        if len(str1) != len(str2):
+            raise ValueError("len of bits stream different")
+        # 计算相同字符的个数
+        matching_count = sum(1 for a, b in zip(str1, str2) if a == b)
+        return matching_count
 
 
 

@@ -35,6 +35,7 @@ class Sender:
         self.setup()
         self.txt_queue = txt_queue
         self.txt_socket_queue = txt_socket_queue
+        bits_list = []
         input_dir = txt_queue.get()
 
         # 读出文件夹中所有.txt文件的句子
@@ -48,8 +49,13 @@ class Sender:
             cn_sentences, int_numbers, float_numbers = split_sentences([single_sentence])
             bit_stream = self.process_sentence(cn_sentences[0], int_numbers, float_numbers, single_sentence)
             self.txt_socket_queue.put(bit_stream)
+            bit_stream = ''.join(format(byte, '08b') for byte in bit_stream)
+
+            bits_list.append(bit_stream)
             self.send_packet_count += 1
             print(f"sending bit_stream {len(bit_stream)}")
+        for i in range(len(bits_list)):
+            self.write_bits_to_file(bits_list[i], "send_bits.txt")
     def parse_arguments(self):
         parser = argparse.ArgumentParser(description="Configuration for the Sender model.")
         parser.add_argument('--vocab-file', default=r'/home/samaritan/Desktop/pipeline_final/pipeline/main_utils/processes/send/send_text_utils/europarl/vocab.json',
@@ -131,3 +137,7 @@ class Sender:
         Tx_sig = Tx_sig.cpu().numpy().tolist()
         total = [Tx_sig] + [int_numbers] * 5 + [float_numbers] * 5 + [single_sentence]
         return list_to_bytes(total)
+
+    def write_bits_to_file(self, bit_stream, file_path):
+        with open(file_path, 'a') as file:
+            file.write(bit_stream)

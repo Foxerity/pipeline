@@ -45,11 +45,15 @@ class ReceiveChannelEffect(Pipeline):
         self.pkg_size = None
         self.byteorder = None
 
+        self.data_dict = None
+
     def setup(self, BER: int = 0.01, BW: float = 3., PKG_SIZE: int = 1047, byteorder: str = "little", **kwargs):
         self.ber = BER
         self.bw = BW
         self.pkg_size = PKG_SIZE
         self.byteorder = byteorder
+
+        self.data_dict = {}
 
     @staticmethod
     def bitlist2bytes(bitlist: list, byteorder: str = "little"):
@@ -110,7 +114,7 @@ class ReceiveChannelEffect(Pipeline):
         packet_delay_time = pkg_size * 8 / (bw * 1024) - other_time
         return packet_delay_time
 
-    def fun(self, put_data_queue, get_data_queue):
+    def fun(self, put_data_queue, get_data_queue, socket_value_queue):
         while True:
             while not put_data_queue.empty():
                 print("ReceiveChannelEffect: getting data")
@@ -118,8 +122,12 @@ class ReceiveChannelEffect(Pipeline):
                 ori_bytes = self.bytes2bitlist(ori_bytes, self.byteorder)
                 ori_bytes, _ber = self.channel_error(ori_bytes, self.ber)
                 ori_bytes = self.bitlist2bytes(ori_bytes, self.byteorder)
-                time.sleep(self.channel_delay(self.bw, self.pkg_size))
+                sleep_time = self.channel_delay(self.bw, self.pkg_size)
+                sleep_time += random.uniform(0.05, 0.2)
+                print(f"effect time: {sleep_time} s")
+                self.data_dict['time'] = 8 * (1047 / sleep_time)
+                time.sleep(sleep_time)
+                socket_value_queue.put(self.data_dict)
                 get_data_queue.put(ori_bytes)
-                print("ReceiveChannelEffect: putting data")
 
 

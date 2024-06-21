@@ -5,17 +5,17 @@ from PyQt5.QtWidgets import QVBoxLayout, QTextEdit, QFileDialog
 
 
 class TextTabWidget(QtWidgets.QWidget):
-    def __init__(self, path=None, txt_queue=None, txt_tral_queue=None, txt_value_queue=None):
+    def __init__(self, path=None, txt_queue=None, txt_tral_queue=None, txt_value_queue=None, socket_value=None):
         super(TextTabWidget, self).__init__(flags=Qt.WindowFlags())
         uic.loadUi(path, self)
         self.txt_queue = txt_queue
         self.txt_tral_queue = txt_tral_queue
+        self.socket_value = socket_value
         self.txt_value_queue = txt_value_queue
         self.txt = ''
         self.raw_content_list = []
         self.sema_content_list = []
         self.tral_content_list = []
-
 
         self.tradition_frame = self.findChild(QtWidgets.QFrame, 'tradition_frame_1')
         self.semantic_frame = self.findChild(QtWidgets.QFrame, 'semantic_frame_1')
@@ -26,7 +26,7 @@ class TextTabWidget(QtWidgets.QWidget):
 
         self.bit_value = self.findChild(QtWidgets.QLabel, 'value_2')
         self.ber_value = self.findChild(QtWidgets.QLabel, 'value_3')
-        self.distant = self.findChild(QtWidgets.QLabel, 'value_4')
+        self.mean_ber_value = self.findChild(QtWidgets.QLabel, 'value_4')
         self.loss_packet_value = self.findChild(QtWidgets.QLabel, 'value_5')
 
         receive_calculate_font = QtGui.QFont()
@@ -40,7 +40,7 @@ class TextTabWidget(QtWidgets.QWidget):
 
         self.bit_value.setFont(receive_calculate_font)
         self.ber_value.setFont(receive_calculate_font)
-        self.distant.setFont(receive_calculate_font)
+        self.mean_ber_value.setFont(receive_calculate_font)
         self.loss_packet_value.setFont(receive_calculate_font)
 
         gt_txt_font = QFont("Arial", 12)  # 使用Arial字体，大小为12
@@ -68,7 +68,6 @@ class TextTabWidget(QtWidgets.QWidget):
         self.timer.timeout.connect(self.emit_calculation)
         self.timer.start(10)  # 每秒触发一次计算
 
-
     def show_txt(self):
         self.ge_text_edit.setPlainText('')
         self.gt_text_edit.setPlainText('')
@@ -92,11 +91,11 @@ class TextTabWidget(QtWidgets.QWidget):
             self.gt_text_edit.append(content)
         QTimer().singleShot(80, lambda: self.show_tra_gen_txt())
 
-
     def true_text(self, text_path):
         with open(text_path, 'r', encoding='utf-8') as file:
             lines = file.readlines()
         self.raw_content_list = lines
+
     def gen_txt(self, gen_path):
         fop = open(gen_path, 'r', encoding='utf8')
         gen_data = fop.read()
@@ -136,6 +135,8 @@ class TextTabWidget(QtWidgets.QWidget):
     def emit_calculation(self):
         if not self.txt_value_queue.empty():
             value = self.txt_value_queue.get()
-            self.bit_value.setText(f"{value['bit_ratio']/1024:.2f} Kbps")
+            time_value = self.socket_value.get()
+            self.bit_value.setText(f"{time_value['time'] / 1024:.2f} Kbps")
             self.loss_packet_value.setText(f"{value['loss_packet'] * 100:.2f}%")
-
+            self.ber_value.setText(f"{value['ber_ratio'] * 100:.2f}%")
+            self.mean_ber_value.setText(f"{value['mean_ber_ratio'] * 100:.2f}%")

@@ -34,10 +34,11 @@ class MainPage(QtWidgets.QMainWindow):
         # 加载并添加四个标签页, 分别对应文本、图像、静态视频、流式视频Tab
         self.tab_widget.addTab(TextTabWidget(self.pages_path[0],
                                              queue_dict['txt_queue'], queue_dict['txt_trad_queue'],
-                                             queue_dict['txt_value_queue']),
+                                             queue_dict['txt_value_queue'], queue_dict['socket_value']),
                                "指令")
 
-        self.tab_widget.addTab(ImageTabWidget(self.pages_path[1], queue_dict['img_queue'], queue_dict["img_tra_queue"], queue_dict["img_value_queue"]),
+        self.tab_widget.addTab(ImageTabWidget(self.pages_path[1], queue_dict['img_queue'], queue_dict["img_tra_queue"],
+                                              queue_dict["img_value_queue"], queue_dict["socket_value"]),
                                "图像")
 
         self.tab_widget.addTab(StaticVidTab(self.pages_path[2],
@@ -114,6 +115,7 @@ class MainWindow(Pipeline):
 
         manager = Manager()
         self.control_queue = manager.Queue()
+        self.socket_value = manager.Queue()
 
         self.txt_queue = manager.Queue()
         self.txt_trad_queue = manager.Queue()
@@ -152,6 +154,7 @@ class MainWindow(Pipeline):
 
     def init_queue_dict(self):
         self.queue_dict["control_queue"] = self.control_queue
+        self.queue_dict["socket_value"] = self.socket_value
 
         self.queue_dict["txt_queue"] = self.txt_queue
         self.queue_dict["txt_trad_queue"] = self.txt_trad_queue

@@ -506,16 +506,16 @@ def replace_and_return(string_list_of_lists, tensor_zero, tensor_ji):
         new_strings = []
         for s in string_list:
             # 替换所有的"零"为tensor_zero中的元素
-            while "零" in s:
+            while "饕" in s:
                 if zero_str_list:
-                    s = s.replace("零", zero_str_list.pop(0), 1)
+                    s = s.replace("饕", zero_str_list.pop(0), 1)
                 else:
                     break  # 如果没有更多的元素来替换，就停止替换
 
             # 替换所有的"寄"为tensor_ji中的元素
-            while "寄" in s:
+            while "餮" in s:
                 if ji_str_list:
-                    s = s.replace("寄", ji_str_list.pop(0), 1)
+                    s = s.replace("餮", ji_str_list.pop(0), 1)
                 else:
                     break  # 如果没有更多的元素来替换，就停止替换
 

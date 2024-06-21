@@ -26,26 +26,6 @@ def load_image_to_tensor(image_path):
     image = image.float().permute(2, 0, 1)  # 从HWC转换到CHW格式
     return image
 
-
-def calculate_compression_ratio(original_data, compressed_data):
-    original_image_bytes = io.BytesIO()
-    original_data.save(original_image_bytes, format='JPEG')
-    original_size = original_image_bytes.tell()
-
-    compressed_image_bytes = io.BytesIO()
-    compressed_data.save(compressed_image_bytes, format='JPEG')
-    compressed_size = compressed_image_bytes.tell()
-
-    # 如果压缩后图像大小为零，则引发错误
-    if compressed_size == 0:
-        raise ValueError("Compressed image size is zero")
-
-    # 计算压缩比例
-    compression_ratio = original_size / compressed_size
-
-    return compression_ratio
-
-
 def calculate_ssim(img1, img2):
     image1 = np.array(img1).astype(np.float32)
     image2 = np.array(img2).astype(np.float32)

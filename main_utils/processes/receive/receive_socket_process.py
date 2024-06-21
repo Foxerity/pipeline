@@ -51,7 +51,8 @@ class ReceiveSocketProcess(Pipeline):
         self.conn, self.addr = None, None
         self.effect_bytes.setup()
         effect_socket = multiprocessing.Process(target=self.effect_bytes.fun, args=(self.put_data_queue,
-                                                                                    self.get_data_queue))
+                                                                                    self.get_data_queue,
+                                                                                    self.queue_dict["socket_value"]))
         effect_socket.start()
 
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -87,12 +88,10 @@ class ReceiveSocketProcess(Pipeline):
                 print("ReceiveSocketProcess: effect data.")
                 self.put_data_queue.put(data)
                 self.raw_count += 1
-                # self.byte_saver.save_byte_stream(data, f"raw_{self.raw_count}.txt")
 
             if not self.get_data_queue.empty():
                 data = self.get_data_queue.get()
                 self.noise_count += 1
-                # self.byte_saver.save_byte_stream(data, f"noise_{self.noise_count}.txt")
                 self.current_queue.put(data)
                 print(f"ReceiveSocketProcess: put noise data {self.noise_count} to ui")
             time.sleep(0.1)

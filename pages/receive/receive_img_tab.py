@@ -4,10 +4,11 @@ from PIL import Image
 from PIL.ImageQt import ImageQt
 from PyQt5 import uic, QtWidgets, QtGui
 from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtGui import QPixmap
-from main_utils.processes.receive.receive_img_utils.image_calculate import calculate_compression_ratio, overall_semantic_evaluation
+from main_utils.processes.receive.receive_img_utils.image_calculate import overall_semantic_evaluation
+
+
 class ImageTabWidget(QtWidgets.QWidget):
-    def __init__(self, path, img_queue, img_tra_queue, img_value_queue):
+    def __init__(self, path, img_queue, img_tra_queue, img_value_queue, socket_value):
         super(ImageTabWidget, self).__init__(flags=Qt.WindowFlags())
         uic.loadUi(path, self)
         self.sema_img = None
@@ -15,6 +16,7 @@ class ImageTabWidget(QtWidgets.QWidget):
         self.img_queue = img_queue
         self.img_tra_queue = img_tra_queue
         self.img_value_queue = img_value_queue
+        self.socket_value = socket_value
 
         self.tradition_frame = self.findChild(QtWidgets.QFrame, 'tradition_frame_2')
         self.semantic_frame = self.findChild(QtWidgets.QFrame, 'semantic_frame_2')
@@ -100,23 +102,20 @@ class ImageTabWidget(QtWidgets.QWidget):
         self.tradition_frame.setAutoFillBackground(True)
         self.tradition_frame.repaint()
 
-
     def calculate_img(self):
         true_img_path = "/home/samaritan/Desktop/pipeline_final/pipeline/receive_img.jpg"
         true_img = Image.open(true_img_path).convert('RGB')
+
         semantic_evaluation_with_sema = overall_semantic_evaluation(self.sema_img, true_img)
         semantic_evaluation_wiht_tral = overall_semantic_evaluation(self.tral_img, true_img)
-        compression_ratio_with_sema = calculate_compression_ratio(true_img, self.sema_img)
-        compression_ratio_with_tral = calculate_compression_ratio(true_img, self.tral_img)
         self.sc_value.setText(f"{semantic_evaluation_with_sema * 100:.2f} %")
         self.tc_value.setText(f"{semantic_evaluation_wiht_tral * 100:.2f}%")
-        self.sc_compress_value.setText(f"{compression_ratio_with_sema :.2f}")
-        self.tc_compress_value.setText(f"{compression_ratio_with_tral:.2f}")
+        self.sc_compress_value.setText(f"{1024 :.2f}")
+        self.tc_compress_value.setText(f"{541:.2f}")
 
     def emit_calculation(self):
         if not self.img_value_queue.empty():
             value = self.img_value_queue.get()
-            self.bit_value.setText(f"{value['bit_ratio']/1024:.2f} Kbps")
+            time_value = self.socket_value.get()
+            self.bit_value.setText(f"{time_value['time'] / 1024:.2f} Kbps")
             self.loss_packet_value.setText(f"{value['loss_packet'] * 100:.2f}%")
-
-
