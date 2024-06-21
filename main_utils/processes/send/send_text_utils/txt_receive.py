@@ -1,12 +1,13 @@
 import os
 import time
-
+from collections import Counter
 import torch
 import json
 import argparse
 from main_utils.processes.send.send_text_utils.models.transceiver import DeepSC
 from main_utils.processes.send.send_text_utils.utils import SeqtoText, most_frequent_element_int, most_frequent_element_float, replace_and_return, subsequent_mask, bytes_to_list
-
+import numpy as np
+import time
 class Receiver:
     def __init__(self):
         super().__init__()
@@ -20,20 +21,42 @@ class Receiver:
         self.receive_data_queue = None
         self.txt_tral_queue = None
 
+        self.value_dict = {
+            "send_packet_count": 0,
+            "recevie_packet_count": 0,             # 接受端受到的包数
+            "most_common_number": 0,                # 发送端发送的包数
+            "loss_packet": 0,                       # 接收端丢包率
+            "bit_ratio": 0,                         # 比特率
+            "ber_ratio": 0,                         # 误码率
+            "mean_ber_ratio": 0                     # 平均误码率
+        }
     def setup(self):
         self.deepsc = self.initialize_deepsc()
         self.load_checkpoint()
         self.deepsc.eval()
 
-    def run(self, send_data_queue, receive_data_queue, txt_tral_queue):
+    def run(self, send_data_queue, receive_data_queue, txt_tral_queue, txt_value_queue):
         self.setup()
+        flag = 0
         while True:
-
             if not send_data_queue.empty():
                 self.receive_data_queue = receive_data_queue
                 self.txt_tral_queue = txt_tral_queue
-
+                start_time = time.time()
                 bit_stream = send_data_queue.get()
+                end_time = time.time()
+                delay_time = end_time - start_time
+                # 比特率
+                self.value_dict["bit_ratio"] = len(bit_stream)/delay_time
+                # 丢包率
+                if flag == 0:
+                    bit_stream = np.frombuffer(bit_stream, dtype='<u2')
+                    counter = Counter(bit_stream)
+                    self.value_dict["send_packet_count"], _ = counter.most_common(1)[0]
+                    flag = 1
+                    continue
+                self.value_dict["recevie_packet_count"] += 1
+
                 receive = bytes_to_list(bit_stream)
                 if len(receive[0][0]) == 0:
                     self.receive_data_queue.put('? \n')
@@ -54,7 +77,9 @@ class Receiver:
                 outputs = self.decode_signal(Rx_sig)
                 result_string = self.process_output(outputs)
                 self.save_result(result_string, total_int, total_float, tral_txt)
+                txt_value_queue.put(self.value_dict)
             time.sleep(0.2)
+        self.value_dict["loss_packet"] = (self.value_dict["send_packet_count"] - self.value_dict["recevie_packet_count"])/self.value_dict["send_packet_count"]
 
     def parse_arguments(self):
         parser = argparse.ArgumentParser(description="Configuration for the Receiver model.")
@@ -138,10 +163,9 @@ class Receiver:
         file_contents = "".join(final[0]).replace("， ", "，") + "\n"
 
         if file_contents.strip():  # Check if file_contents is not just whitespace or empty
-            with open("./output.txt", 'a', encoding='utf-8') as file:
-                file.write(file_contents)
             self.receive_data_queue.put(file_contents)
             self.txt_tral_queue.put(tral_txt)
+
 
 
 

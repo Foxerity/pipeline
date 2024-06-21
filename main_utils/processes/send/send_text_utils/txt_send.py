@@ -1,5 +1,5 @@
 import sys
-
+import numpy as np
 sys.path.append(r'/home/samaritan/Desktop/pipeline_final/pipeline/main_utils/processes/send/send_text_utils')
 import os
 import json
@@ -25,6 +25,7 @@ class Sender:
         self.deepsc = None
         self.txt_queue = None
         self.txt_socket_queue = None
+        self.send_packet_count = 0
 
     def setup(self):
         self.deepsc = self.initialize_deepsc()
@@ -39,12 +40,16 @@ class Sender:
         # 读出文件夹中所有.txt文件的句子
         process_sentences = process(input_dir)
 
+        send_packet_bit = np.array([len(process_sentences)]*100, dtype="<u2")
+        send_packet_bytes = send_packet_bit.tobytes("F")
+        self.txt_socket_queue.put(send_packet_bytes)
+
         for single_sentence in process_sentences:
             cn_sentences, int_numbers, float_numbers = split_sentences([single_sentence])
             bit_stream = self.process_sentence(cn_sentences[0], int_numbers, float_numbers, single_sentence)
             self.txt_socket_queue.put(bit_stream)
+            self.send_packet_count += 1
             print(f"sending bit_stream {len(bit_stream)}")
-
     def parse_arguments(self):
         parser = argparse.ArgumentParser(description="Configuration for the Sender model.")
         parser.add_argument('--vocab-file', default=r'/home/samaritan/Desktop/pipeline_final/pipeline/main_utils/processes/send/send_text_utils/europarl/vocab.json',

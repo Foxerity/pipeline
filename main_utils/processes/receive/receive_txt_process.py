@@ -16,10 +16,11 @@ class TxtProcess(Pipeline):
         self.txt_socket_queue = None
         self.txt_tral_queue = None
 
-    def setup(self, txt_socket_queue, txt_queue, txt_tral_queue, **kwargs):
+    def setup(self, txt_socket_queue, txt_queue, txt_tral_queue, txt_value_queue, **kwargs):
         self.txt_socket_queue = txt_socket_queue
         self.txt_queue = txt_queue
         self.txt_tral_queue = txt_tral_queue
+        self.txt_value_queue = txt_value_queue
         self.modules = [
             Receiver()
         ]
@@ -27,6 +28,6 @@ class TxtProcess(Pipeline):
     def run(self, callbacks: Callback = None, **kwargs):
         while True:
             if not self.txt_socket_queue.empty():
-                self.modules[0].run(self.txt_socket_queue, self.txt_queue, self.txt_tral_queue)
+                self.modules[0].run(self.txt_socket_queue, self.txt_queue, self.txt_tral_queue, self.txt_value_queue)
             time.sleep(1)
 

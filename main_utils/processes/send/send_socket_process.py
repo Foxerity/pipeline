@@ -25,6 +25,7 @@ class SendSocketProcess(Pipeline):
     def connect(self):
         self.count = 0
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
         self.socket.connect((self.host, self.port))
 
     def run(self, **kwargs):

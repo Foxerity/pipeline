@@ -1,5 +1,6 @@
 import time
 
+import numpy as np
 from PIL import Image
 
 from main_utils.processes.send.send_img_utils.tradition_send import JPEGCompression, array2bin
@@ -35,9 +36,14 @@ class ImgProcess(Pipeline):
         img_2k = resize_2k_image(img)
         img_64 = downsample_images(img_2k)
         image_chunks_list = split_image(img_64)
+
+        # 第一包设置为100个数据包数
+        send_packet_bit = np.array([len(image_chunks_list)] * 100, dtype="<u2")
+        send_packet_bytes = send_packet_bit.tobytes("F")
+        self.img_socket_queue.put(send_packet_bytes)
+
         for image_chunks in image_chunks_list:
             image_chunks = image_chunks.tobytes()
-
             while len(image_chunks) < 1044:
                 image_chunks += b'\x00'
             image_chunks = b'\x24' + b'\x4d' + b'\x53' + image_chunks
@@ -47,6 +53,11 @@ class ImgProcess(Pipeline):
         out_dir = 'temp'
         img = JPEGCompression(img_path, out_dir)
         data = array2bin(img)
+
+        # 第一包设置为100个数据包数
+        send_packet_bit = np.array([len(range(0, len(data), 1044))] * 100, dtype="<u2")
+        send_packet_bytes = send_packet_bit.tobytes("F")
+        self.img_socket_queue.put(send_packet_bytes)
 
         for i in range(0, len(data), 1044):
             chunk = data[i:i + 1044]

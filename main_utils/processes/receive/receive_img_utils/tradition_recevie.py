@@ -12,6 +12,7 @@ def bin2array(bit_list, img_shape):
             bits += str(int(bit))
         try:
             byte_num = int(bits, 2)
+            print(bits)
         except ValueError:
             print(bits)
 

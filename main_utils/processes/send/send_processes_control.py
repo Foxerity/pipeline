@@ -16,9 +16,9 @@ class ProcessesControl(Pipeline):
     def setup(self, queue_dict, **kwargs):
         self.config = {
             'name': "Object Detection",
-            # 'host': '10.168.2.191',
+            # 'host': '192.168.2.137',
             'host': '127.0.0.1',
-            'port': 60009,
+            'port': 12343,
         }
         self.queue_dict = queue_dict
 

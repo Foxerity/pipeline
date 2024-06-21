@@ -9,11 +9,12 @@ from PyQt5.QtCore import Qt, QTimer
 
 
 class StaticVidTab(QtWidgets.QWidget):
-    def __init__(self, path, vid_obj_queue, rece_vid_queue):
+    def __init__(self, path, vid_obj_queue, rece_vid_queue, static_value_queue):
         super(StaticVidTab, self).__init__(flags=Qt.WindowFlags())
         self.gt_path = r'/home/samaritan/Desktop/videos'
         self.rece_vid_queue = rece_vid_queue
         self.vid_obj_queue = vid_obj_queue
+        self.static_value_queue = static_value_queue
 
         self.frame_rate = 15
         self.clip = None
@@ -43,6 +44,11 @@ class StaticVidTab(QtWidgets.QWidget):
 
         self.comboBox.currentIndexChanged.connect(self.combo_changed)
         self.receiveButton.clicked.connect(self.receive_clicked)
+        # self.calculateButton.clicked.connect(self.calculate_static)
+
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.emit_calculation)
+        self.timer.start(10)  # 10ms秒触发一次计算
 
     def combo_changed(self):
         # 获取当前选中的文本
@@ -100,3 +106,11 @@ class StaticVidTab(QtWidgets.QWidget):
         self.semantic_frame.setAutoFillBackground(True)
         self.semantic_frame.repaint()
 
+    def calculate_static(self):
+        pass
+
+    def emit_calculation(self):
+        if not self.static_value_queue.empty():
+            value = self.static_value_queue.get()
+            self.bit_value.setText(f"{value['bit_ratio']/1024:.2f} Kbps")
+            self.loss_packet_value.setText(f"{value['loss_packet'] * 100:.2f}%")

@@ -15,7 +15,7 @@ class StaticVidProcess(Pipeline):
         super().__init__()
         self.path = None
         self.video_queue = None
-        self.socket_queue = None
+        self.video_socket_queue = None
 
     def setup(self, video_queue, video_socket_queue, **kwargs):
         self.path = "/home/samaritan/pipeline/main_utils/processes/send/send_utils/"

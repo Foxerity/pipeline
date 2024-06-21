@@ -12,12 +12,14 @@ class StaticVidProcess(Pipeline):
         self.vid_obj_queue = None
         self.rece_vid_queue = None
         self.socket_queue = None
+        self.static_value_queue = None
         self.model_name = None
 
-    def setup(self, vid_obj_queue, rece_vid_queue, socket_queue, **kwargs):
+    def setup(self, vid_obj_queue, rece_vid_queue, socket_queue, static_value_queue, **kwargs):
         self.vid_obj_queue = vid_obj_queue
         self.rece_vid_queue = rece_vid_queue
         self.socket_queue = socket_queue
+        self.static_value_queue = static_value_queue
 
     def run(self, **kwargs):
         while True:

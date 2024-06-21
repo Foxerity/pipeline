@@ -18,7 +18,7 @@ class ProcessesControl(Pipeline):
         self.config = {
             # 'host': '192.168.2.137',
             'host': '127.0.0.1',
-            'port': 60009,
+            'port': 12343,
         }
         self.modules = [
             ReceiveSocketProcess(),
@@ -30,13 +30,14 @@ class ProcessesControl(Pipeline):
         self.initialize_modules()
 
         self.modules[0].setup(self.config['host'], self.config['port'], queue_dict)
-        self.modules[1].setup(queue_dict['txt_socket_queue'], queue_dict['txt_queue'], queue_dict['txt_trad_queue'])
-        self.modules[2].setup(queue_dict['img_queue'], queue_dict["img_tra_queue"], queue_dict['img_socket_queue'])
-        self.modules[3].setup(queue_dict['vid_obj_queue'], queue_dict['rec_queue'], queue_dict['static_socket_queue'])
+        self.modules[1].setup(queue_dict['txt_socket_queue'], queue_dict['txt_queue'], queue_dict['txt_trad_queue'], queue_dict['txt_value_queue'])
+        self.modules[2].setup(queue_dict['img_queue'], queue_dict["img_tra_queue"], queue_dict['img_socket_queue'], queue_dict['img_value_queue'])
+        self.modules[3].setup(queue_dict['vid_obj_queue'], queue_dict['rec_queue'], queue_dict['static_socket_queue'],queue_dict['static_value_queue'])
         # self.modules[4].setup(queue_dict['skeleton_queue'], queue_dict['generation_queue'])
 
     def run(self, **kwargs):
         print("creating subprocesses.")
+
         socket_process = multiprocessing.Process(target=self.modules[0].run)
         socket_process.start()
 
