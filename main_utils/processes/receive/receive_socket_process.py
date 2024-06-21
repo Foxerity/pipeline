@@ -87,12 +87,12 @@ class ReceiveSocketProcess(Pipeline):
                 print("ReceiveSocketProcess: effect data.")
                 self.put_data_queue.put(data)
                 self.raw_count += 1
-                self.byte_saver.save_byte_stream(data, f"raw_{self.raw_count}.txt")
+                # self.byte_saver.save_byte_stream(data, f"raw_{self.raw_count}.txt")
 
             if not self.get_data_queue.empty():
                 data = self.get_data_queue.get()
                 self.noise_count += 1
-                self.byte_saver.save_byte_stream(data, f"noise_{self.noise_count}.txt")
+                # self.byte_saver.save_byte_stream(data, f"noise_{self.noise_count}.txt")
                 self.current_queue.put(data)
                 print(f"ReceiveSocketProcess: put noise data {self.noise_count} to ui")
             time.sleep(0.1)
@@ -115,7 +115,6 @@ class ReceiveSocketProcess(Pipeline):
             except socket.error as e:
                 print(f"clean_channel: Socket error: {e}")
                 break
-        # self.conn.setblocking(True)
 
     def clear_queue(self):
         try:

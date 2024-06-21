@@ -427,39 +427,41 @@ def greedy_decode(model, src, n_var, max_len, padding_idx, start_symbol, channel
 
 
 def most_frequent_element_int(tensor1, tensor2, tensor3, tensor4, tensor5):
-    # 获取tensor数组的形状
+    # 假设所有输入张量形状相同
     shape = tensor1.shape
 
-    # 初始化估计的tensor数组
-    estimated_tensor = torch.zeros_like(tensor1)
+    # 初始化估计的tensor数组，这里使用float32以保持与输入张量兼容
+    estimated_tensor = torch.zeros(shape, dtype=torch.float32)
+
+    # 32位浮点数的位数，包括符号位
+    num_bits = 32
 
     # 对每个位置进行处理
     for i in range(shape[0]):
-        # 获取该位置上五个元素的值
-        values = [tensor1[i].item(), tensor2[i].item(), tensor3[i].item(), tensor4[i].item(), tensor5[i].item()]
+        # 获取该位置上五个元素的值，并将它们转换为整数
+        values = [int(tensor[i].item()) for tensor in [tensor1, tensor2, tensor3, tensor4, tensor5]]
 
-        # 找到最大绝对值
-        max_abs_value = max(map(abs, values))
-
-        # 确定需要的位数
-        num_bits = int(max_abs_value).bit_length() + 1
+        # 初始化每一位的计数
+        bit_counts = [0] * num_bits
 
         # 统计每一位的出现次数
-        bit_counts = [0] * num_bits
         for value in values:
-            binary_str = format(int(value), 'b').zfill(num_bits)
-            for j, bit in enumerate(binary_str):
-                bit_counts[j] += int(bit)
+            # 如果值是负数，取其补码
+            if value < 0:
+                value &= (1 << num_bits) - 1  # 取32位补码
 
-        # 按位取概率最大的那一位
+            # 将整数转换为32位二进制字符串
+            binary_str = format(value, '032b')
+
+            # 迭代32位并统计
+            for j in range(num_bits):
+                bit_counts[j] += int(binary_str[j], 2)
+
+        # 按位选择最常见的比特
         estimated_binary_str = ''.join(['1' if count >= 3 else '0' for count in bit_counts])
 
-        # 将估计的二进制字符串转换回int类型
+        # 将估计的二进制字符串转换回整数
         estimated_value = int(estimated_binary_str, 2)
-
-        # 处理负数情况
-        if any(value < 0 for value in values):
-            estimated_value = -estimated_value
 
         # 存储估计的值
         estimated_tensor[i] = estimated_value
@@ -469,21 +471,25 @@ def most_frequent_element_int(tensor1, tensor2, tensor3, tensor4, tensor5):
 
 def most_frequent_element_float(tensor1, tensor2, tensor3, tensor4, tensor5):
     # 确保所有tensor的形状相同
-    assert tensor1.shape == tensor2.shape, "Tensor shapes must be the same."
-    assert tensor2.shape == tensor3.shape, "Tensor shapes must be the same."
-    assert tensor3.shape == tensor4.shape, "Tensor shapes must be the same."
-    assert tensor4.shape == tensor5.shape, "Tensor shapes must be the same."
+    assert all(
+        t.shape == tensor1.shape for t in [tensor2, tensor3, tensor4, tensor5]), "Tensor shapes must be the same."
 
-    # 初始化估计的tensor数组，与输入tensor有相同的形状和dtype
-    estimated_tensor = torch.zeros_like(tensor1, dtype=torch.float32)
+    # 初始化中位数张量，与输入tensor有相同的形状和dtype
+    median_tensor = torch.zeros_like(tensor1, dtype=torch.float32)
 
-    # 计算对应位置元素的平均值
-    estimated_tensor = (tensor1 + tensor2 + tensor3 + tensor4 + tensor5) / 5
+    # 对每个位置计算中位数
+    for i in range(tensor1.size(0)):  # 假设tensor1是第一个维度
+        values = torch.cat([
+            tensor1[i].unsqueeze(0),
+            tensor2[i].unsqueeze(0),
+            tensor3[i].unsqueeze(0),
+            tensor4[i].unsqueeze(0),
+            tensor5[i].unsqueeze(0)
+        ])
+        median_value = torch.median(values).item()  # 计算中位数并转换为Python标量
+        median_tensor[i] = round(median_value, 1)  # 四舍五入到一位小数
 
-    # 将结果四舍五入到一位小数（先乘以10，四舍五入，再除以10）
-    estimated_tensor = (estimated_tensor * 10).round_() / 10
-
-    return estimated_tensor
+    return median_tensor
 
 
 def replace_and_return(string_list_of_lists, tensor_zero, tensor_ji):
@@ -576,9 +582,9 @@ def split_sentences(sentences):
         # 扣中文
         chinese_matches = chinese_pattern.findall(string)
         decimal_matches = decimal_pattern.findall(string)
-        new_chinese_string = re.sub(decimal_pattern, '寄', string)
+        new_chinese_string = re.sub(decimal_pattern, ' 餮 ', string)
         digits_matches = digits_pattern.findall(new_chinese_string)
-        new_chinese_string = re.sub(digits_pattern, '零', new_chinese_string)
+        new_chinese_string = re.sub(digits_pattern, ' 餮 ', new_chinese_string)
         cn_sentences.append(new_chinese_string)
 
         # 扣整数

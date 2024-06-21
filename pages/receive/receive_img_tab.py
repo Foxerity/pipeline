@@ -25,7 +25,6 @@ class ImageTabWidget(QtWidgets.QWidget):
         self.sc_compress_value = self.findChild(QtWidgets.QLabel, 'img_compress_sc_value')
         self.tc_compress_value = self.findChild(QtWidgets.QLabel, 'img_compress_tc_value')
 
-        self.daud_value = self.findChild(QtWidgets.QLabel, 'value_1')
         self.bit_value = self.findChild(QtWidgets.QLabel, 'value_2')
         self.ber_value = self.findChild(QtWidgets.QLabel, 'value_3')
         self.distant = self.findChild(QtWidgets.QLabel, 'value_4')
@@ -39,7 +38,6 @@ class ImageTabWidget(QtWidgets.QWidget):
         self.calculateButton.setText('计算')
         self.sc_value.setFont(receive_calculate_font)
         self.tc_value.setFont(receive_calculate_font)
-        self.daud_value.setFont(receive_calculate_font)
         self.bit_value.setFont(receive_calculate_font)
         self.ber_value.setFont(receive_calculate_font)
         self.distant.setFont(receive_calculate_font)
