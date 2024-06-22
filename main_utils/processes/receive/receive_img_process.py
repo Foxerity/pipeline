@@ -22,10 +22,10 @@ class ImgProcess(Pipeline):
             "send_packet_count": 0,
             "recevie_packet_count": 0,  # 接受端受到的包数
             "most_common_number": 0,  # 发送端发送的包数
-            "loss_packet": 0,  # 接收端丢包率
-            "bit_ratio": 0,  # 比特率
-            "ber_ratio": 0,  # 误码率
-            "mean_ber_ratio": 0  # 平均误码率
+            "loss_packet": 0.,  # 接收端丢包率
+            "bit_ratio": 0.,  # 比特率
+            "ber_ratio": 0.,  # 误码率
+            "mean_ber_ratio": 0.  # 平均误码率
         }
 
     def setup(self, img_queue, img_tra_queue, img_socket_queue, img_value_queue, **kwargs):
@@ -40,16 +40,10 @@ class ImgProcess(Pipeline):
             received_chunks = []
             received_tra_chunks = []
             total_size = 0
-            count = 0
             while True:
                 if not self.img_socket_queue.empty():
-                    start_time = time.time()
-
                     chunk = self.img_socket_queue.get()
-                    end_time = time.time()
-                    delay_time = end_time - start_time
                     # 比特率
-                    self.value_dict["bit_ratio"] = len(chunk) / delay_time
                     # 丢包率
                     if flag == 0:
                         chunk = np.frombuffer(chunk, dtype='<u2')
@@ -72,18 +66,14 @@ class ImgProcess(Pipeline):
             reconstructed_image = reconstruct_image(received_chunks)
             super_resolution_image = super_resolution(reconstructed_image)
             self.img_queue.put(super_resolution_image)
-            self.value_dict["loss_packet"] = (self.value_dict["send_packet_count"] - self.value_dict["recevie_packet_count"]) / self.value_dict["send_packet_count"]
+            self.value_dict["loss_packet"] = (self.value_dict["send_packet_count"] - self.value_dict[
+                "recevie_packet_count"]) / self.value_dict["send_packet_count"]
             self.value_dict["recevie_packet_count"] = 0
             flag = 0
 
             while True:
                 if not self.img_socket_queue.empty():
-                    start_time = time.time()
                     chunk = self.img_socket_queue.get()
-                    end_time = time.time()
-                    delay_time = end_time - start_time
-                    # 比特率
-                    self.value_dict["bit_ratio"] = len(chunk) / delay_time
                     # 丢包率
                     if flag == 0:
                         chunk = np.frombuffer(chunk, dtype='<u2')
@@ -111,4 +101,6 @@ class ImgProcess(Pipeline):
             restore_rgb = cv2.cvtColor(restore_uint8, cv2.COLOR_BGR2RGB)
             pil_image = Image.fromarray(restore_rgb.astype('uint8'))
             self.img_tra_queue.put(pil_image)
-            self.value_dict["loss_packet"] = (self.value_dict["send_packet_count"] - self.value_dict["recevie_packet_count"]) / self.value_dict["send_packet_count"]
+            self.value_dict["loss_packet"] = ((self.value_dict["send_packet_count"] -
+                                               self.value_dict["recevie_packet_count"]) /
+                                              self.value_dict["send_packet_count"])

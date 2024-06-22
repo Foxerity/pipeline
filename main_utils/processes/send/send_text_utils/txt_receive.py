@@ -8,6 +8,8 @@ from main_utils.processes.send.send_text_utils.models.transceiver import DeepSC
 from main_utils.processes.send.send_text_utils.utils import SeqtoText, most_frequent_element_int, most_frequent_element_float, replace_and_return, subsequent_mask, bytes_to_list
 import numpy as np
 import time
+
+
 class Receiver:
     def __init__(self):
         super().__init__()
@@ -23,13 +25,14 @@ class Receiver:
 
         self.value_dict = {
             "send_packet_count": 0,
-            "recevie_packet_count": 0,             # 接受端受到的包数
-            "most_common_number": 0,                # 发送端发送的包数
-            "loss_packet": 0,                       # 接收端丢包率
-            "bit_ratio": 0,                         # 比特率
-            "ber_ratio": 0,                         # 误码率
-            "mean_ber_ratio": 0                     # 平均误码率
+            "recevie_packet_count": 0,  # 接受端受到的包数
+            "most_common_number": 0,  # 发送端发送的包数
+            "loss_packet": 0,  # 接收端丢包率
+            "bit_ratio": 0,  # 比特率
+            "ber_ratio": 0,  # 误码率
+            "mean_ber_ratio": 0  # 平均误码率
         }
+
     def setup(self):
         self.deepsc = self.initialize_deepsc()
         self.load_checkpoint()
@@ -46,10 +49,7 @@ class Receiver:
                 self.receive_data_queue = receive_data_queue
                 self.txt_tral_queue = txt_tral_queue
                 send_bit = self.send_bits()
-                start_time = time.time()
                 bit_stream = send_data_queue.get()
-                end_time = time.time()
-                delay_time = end_time - start_time
                 bits_stream = ''.join(format(byte, '08b') for byte in bit_stream)
                 # 误码率
                 bit_end += len(bits_stream)
@@ -62,7 +62,6 @@ class Receiver:
                     bit_end = 0
                 self.value_dict["ber_ratio"] = float(ber)
                 # 比特率
-                self.value_dict["bit_ratio"] = len(bit_stream)/delay_time
                 # 丢包率
                 if flag == 0:
                     bit_stream = np.frombuffer(bit_stream, dtype='<u2')
@@ -71,7 +70,6 @@ class Receiver:
                     flag = 1
                     continue
                 self.value_dict["recevie_packet_count"] += 1
-
 
                 ber_list.append(ber)
 
@@ -98,12 +96,17 @@ class Receiver:
                 txt_value_queue.put(self.value_dict)
                 self.value_dict["mean_ber_ratio"] = sum(ber_list) / len(ber_list)
             time.sleep(0.2)
-        self.value_dict["loss_packet"] = (self.value_dict["send_packet_count"] - self.value_dict["recevie_packet_count"])/self.value_dict["send_packet_count"]
+        self.value_dict["loss_packet"] = (self.value_dict["send_packet_count"] - self.value_dict[
+            "recevie_packet_count"]) / self.value_dict["send_packet_count"]
         txt_value_queue.put(self.value_dict)
+
     def parse_arguments(self):
         parser = argparse.ArgumentParser(description="Configuration for the Receiver model.")
-        parser.add_argument('--vocab-file', default='main_utils/processes/send/send_text_utils/europarl/vocab.json', type=str, help='Path to the vocabulary file.')
-        parser.add_argument('--checkpoint-path', default='main_utils/processes/send/send_text_utils/checkpoints/deepsc-AWGN', type=str, help='Path to the checkpoint directory.')
+        parser.add_argument('--vocab-file', default='main_utils/processes/send/send_text_utils/europarl/vocab.json',
+                            type=str, help='Path to the vocabulary file.')
+        parser.add_argument('--checkpoint-path',
+                            default='main_utils/processes/send/send_text_utils/checkpoints/deepsc-AWGN', type=str,
+                            help='Path to the checkpoint directory.')
         parser.add_argument('--channel', default='AWGN', type=str, help='Channel type.')
         parser.add_argument('--MAX-LENGTH', default=50, type=int, help='Maximum sequence length.')
         parser.add_argument('--MIN-LENGTH', default=4, type=int, help='Minimum sequence length.')
@@ -198,6 +201,3 @@ class Receiver:
         # 计算相同字符的个数
         matching_count = sum(1 for a, b in zip(str1, str2) if a == b)
         return matching_count
-
-
-

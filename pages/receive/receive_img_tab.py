@@ -4,7 +4,7 @@ from PIL import Image
 from PIL.ImageQt import ImageQt
 from PyQt5 import uic, QtWidgets, QtGui
 from PyQt5.QtCore import Qt, QTimer
-from main_utils.processes.receive.receive_img_utils.image_calculate import overall_semantic_evaluation
+from main_utils.processes.receive.receive_img_utils.image_calculate import ImageCalculator
 
 
 class ImageTabWidget(QtWidgets.QWidget):
@@ -17,6 +17,8 @@ class ImageTabWidget(QtWidgets.QWidget):
         self.img_tra_queue = img_tra_queue
         self.img_value_queue = img_value_queue
         self.socket_value = socket_value
+
+        self.image_calculator = ImageCalculator()
 
         self.tradition_frame = self.findChild(QtWidgets.QFrame, 'tradition_frame_2')
         self.semantic_frame = self.findChild(QtWidgets.QFrame, 'semantic_frame_2')
@@ -106,8 +108,8 @@ class ImageTabWidget(QtWidgets.QWidget):
         true_img_path = "/home/samaritan/Desktop/pipeline_final/pipeline/receive_img.jpg"
         true_img = Image.open(true_img_path).convert('RGB')
 
-        semantic_evaluation_with_sema = overall_semantic_evaluation(self.sema_img, true_img)
-        semantic_evaluation_wiht_tral = overall_semantic_evaluation(self.tral_img, true_img)
+        semantic_evaluation_with_sema = self.image_calculator.overall_semantic_evaluation(self.sema_img, true_img)
+        semantic_evaluation_wiht_tral = self.image_calculator.overall_semantic_evaluation(self.tral_img, true_img)
         self.sc_value.setText(f"{semantic_evaluation_with_sema * 100:.2f} %")
         self.tc_value.setText(f"{semantic_evaluation_wiht_tral * 100:.2f}%")
         self.sc_compress_value.setText(f"{1024 :.2f}")

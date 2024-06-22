@@ -42,7 +42,8 @@ class MainPage(QtWidgets.QMainWindow):
                                "图像")
 
         self.tab_widget.addTab(StaticVidTab(self.pages_path[2],
-                                            queue_dict['vid_obj_queue'], queue_dict['rec_queue'], queue_dict["static_value_queue"]),
+                                            queue_dict['vid_obj_queue'], queue_dict['rec_queue'],
+                                            queue_dict["static_value_queue"]),
                                "静态视频")
 
         self.tab_widget.addTab(StreamVidTab(self.pages_path[3],
@@ -97,15 +98,29 @@ class MainPage(QtWidgets.QMainWindow):
 
 class MainWindow(Pipeline):
     queue_dict = {
+        "control_queue": Union[Queue, Any],
+        "socket_value": Union[Queue, Any],
+
         "txt_queue": Union[Queue, Any],
         "txt_trad_queue": Union[Queue, Any],
         "txt_socket_queue": Union[Queue, Any],
+        "txt_value_queue": Union[Queue, Any],
 
         "img_queue": Union[Queue, Any],
+        "img_tra_queue": Union[Queue, Any],
+        "img_socket_queue": Union[Queue, Any],
+        "img_value_queue": Union[Queue, Any],
 
-        "static_vid_pro": Union[Queue, Any],
+        "vid_obj_queue": Union[Queue, Any],
+        "rec_queue": Union[Queue, Any],
+        "static_socket_queue": Union[Queue, Any],
+        "static_value_queue": Union[Queue, Any],
 
-        "stream_vid_pro": Union[Queue, Any],
+        "skeleton_queue": Union[Queue, Any],
+        "generation_queue": Union[Queue, Any],
+        "stream_socket_queue": Union[Queue, Any],
+        "stream_value_queue": Union[Queue, Any],
+
     }
 
     def __init__(self):

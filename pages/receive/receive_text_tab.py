@@ -96,22 +96,6 @@ class TextTabWidget(QtWidgets.QWidget):
             lines = file.readlines()
         self.raw_content_list = lines
 
-    def gen_txt(self, gen_path):
-        fop = open(gen_path, 'r', encoding='utf8')
-        gen_data = fop.read()
-        gen_data = str(gen_data).replace(' ', '')
-        sentences = gen_data.strip().split('\n')
-        fop.close()
-        return sentences
-
-    def tra_gen_txt(self, tra_gen_path):
-        fop = open(tra_gen_path, 'r', encoding='utf8')
-        gen_data = fop.read()
-        gen_data = str(gen_data).replace(' ', '')
-        sentences = gen_data.strip().split('\n')
-        fop.close()
-        return sentences
-
     def calculate_txt(self):
         sc_same_count = 0
         tc_same_count = 0
