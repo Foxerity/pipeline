@@ -54,8 +54,7 @@ class Sender:
             bits_list.append(bit_stream)
             self.send_packet_count += 1
             print(f"sending bit_stream {len(bit_stream)}")
-        for i in range(len(bits_list)):
-            self.write_bits_to_file(bits_list[i], "send_bits.txt")
+            self.write_bits_to_file(bit_stream, "send_bits.txt")
     def parse_arguments(self):
         parser = argparse.ArgumentParser(description="Configuration for the Sender model.")
         parser.add_argument('--vocab-file', default=r'/home/samaritan/Desktop/pipeline_final/pipeline/main_utils/processes/send/send_text_utils/europarl/vocab.json',

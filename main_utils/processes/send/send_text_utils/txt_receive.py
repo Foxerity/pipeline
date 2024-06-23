@@ -61,7 +61,8 @@ class Receiver:
                     bit_start = 0
                     bit_end = 0
                 self.value_dict["ber_ratio"] = float(ber)
-                # 比特率
+                ber_list.append(ber)
+                self.value_dict["mean_ber_ratio"] = sum(ber_list) / len(ber_list)
                 # 丢包率
                 if flag == 0:
                     bit_stream = np.frombuffer(bit_stream, dtype='<u2')
@@ -70,8 +71,6 @@ class Receiver:
                     flag = 1
                     continue
                 self.value_dict["recevie_packet_count"] += 1
-
-                ber_list.append(ber)
 
                 receive = bytes_to_list(bit_stream)
                 if len(receive[0][0]) == 0:
@@ -94,7 +93,7 @@ class Receiver:
                 result_string = self.process_output(outputs)
                 self.save_result(result_string, total_int, total_float, tral_txt)
                 txt_value_queue.put(self.value_dict)
-                self.value_dict["mean_ber_ratio"] = sum(ber_list) / len(ber_list)
+
             time.sleep(0.2)
         self.value_dict["loss_packet"] = (self.value_dict["send_packet_count"] - self.value_dict[
             "recevie_packet_count"]) / self.value_dict["send_packet_count"]

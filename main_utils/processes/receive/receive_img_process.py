@@ -40,10 +40,29 @@ class ImgProcess(Pipeline):
             received_chunks = []
             received_tra_chunks = []
             total_size = 0
+
+            bit_start = 0
+            bit_end = 0
+            ber_list = []
+            send_bit = self.send_bits("semantic_compress.txt")
             while True:
                 if not self.img_socket_queue.empty():
                     chunk = self.img_socket_queue.get()
-                    # 比特率
+
+                    bits_stream = ''.join(format(byte, '08b') for byte in chunk)
+                    # 误码率
+                    bit_end += len(bits_stream)
+                    count = self.count_matching_bits(send_bit[bit_start:bit_end], bits_stream)
+                    ber = (len(bits_stream) - count) / len(bits_stream)
+
+                    bit_start = bit_end
+                    if bit_start == bit_end:
+                        bit_start = 0
+                        bit_end = 0
+                    self.value_dict["ber_ratio"] = float(ber)
+                    ber_list.append(ber)
+                    self.value_dict["mean_ber_ratio"] = sum(ber_list) / len(ber_list)
+
                     # 丢包率
                     if flag == 0:
                         chunk = np.frombuffer(chunk, dtype='<u2')
@@ -70,10 +89,29 @@ class ImgProcess(Pipeline):
                 "recevie_packet_count"]) / self.value_dict["send_packet_count"]
             self.value_dict["recevie_packet_count"] = 0
             flag = 0
-
+            bit_start = 0
+            bit_end = 0
+            ber_list = []
+            send_bit = self.send_bits("tradition_compress.txt")
             while True:
                 if not self.img_socket_queue.empty():
                     chunk = self.img_socket_queue.get()
+
+                    bits_stream = ''.join(format(byte, '08b') for byte in chunk)
+
+                    # 误码率
+                    bit_end += len(bits_stream)
+                    count = self.count_matching_bits(send_bit[bit_start:bit_end], bits_stream)
+                    ber = (len(bits_stream) - count) / len(bits_stream)
+
+                    bit_start = bit_end
+                    if bit_start == bit_end:
+                        bit_start = 0
+                        bit_end = 0
+                    self.value_dict["ber_ratio"] = float(ber)
+                    ber_list.append(ber)
+                    self.value_dict["mean_ber_ratio"] = sum(ber_list) / len(ber_list)
+
                     # 丢包率
                     if flag == 0:
                         chunk = np.frombuffer(chunk, dtype='<u2')
@@ -91,7 +129,6 @@ class ImgProcess(Pipeline):
                         print("ImgProcess: finished 179 chunks")
                         break
                     self.img_value_queue.put(self.value_dict)
-                    print(self.value_dict["bit_ratio"])
                     time.sleep(0.1)
             flattened_list = [item for sublist in received_tra_chunks for item in sublist]
             data = bin2array(flattened_list[0: 185856], (88, 88, 3))
@@ -104,3 +141,19 @@ class ImgProcess(Pipeline):
             self.value_dict["loss_packet"] = ((self.value_dict["send_packet_count"] -
                                                self.value_dict["recevie_packet_count"]) /
                                               self.value_dict["send_packet_count"])
+
+    @staticmethod
+    def send_bits(path):
+        with open("resources/send/" + path, 'r') as file:
+            send_bit_stream = file.read()
+        return send_bit_stream
+
+    @staticmethod
+    def count_matching_bits(str1, str2):
+        # 确保两个字符串的长度相同
+        if len(str1) != len(str2):
+            print(ValueError("len of bits stream different"))
+            return 0
+        # 计算相同字符的个数
+        matching_count = sum(1 for a, b in zip(str1, str2) if a == b)
+        return matching_count

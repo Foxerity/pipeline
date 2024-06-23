@@ -58,7 +58,7 @@ class ProcessesControl(Pipeline):
                     queue_dict['vid_obj_queue'],
                     queue_dict['rec_queue'],
                     queue_dict['static_socket_queue'],
-                    queue_dict['static_value_queue']
+                    queue_dict['static_value_queue'],
             ),
             "StreamVidProcess": (
                     queue_dict['skeleton_queue'],
@@ -69,7 +69,7 @@ class ProcessesControl(Pipeline):
         self.ReceiveSocketProcess.setup(*parameters['ReceiveSocketProcess'])
         self.TxtProcess.setup(*parameters['TxtProcess'])
         self.ImgProcess.setup(*parameters['ImgProcess'])
-        # self.StaticVidProcess.setup(*parameters['StaticVidProcess'])
+        self.StaticVidProcess.setup(*parameters['StaticVidProcess'])
         # self.StreamVidProcess.setup(*parameters['StreamVidProcess'])
 
     def run(self, **kwargs):

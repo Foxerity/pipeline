@@ -38,7 +38,7 @@ class ImageCalculator(Pipeline):
         return image
 
     @staticmethod
-    def calculate_ssim(self, img1, img2):
+    def calculate_ssim(img1, img2):
         image1 = np.array(img1).astype(np.float32)
         image2 = np.array(img2).astype(np.float32)
         height, width = image1.shape[:2]

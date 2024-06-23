@@ -19,6 +19,7 @@ class ImageTabWidget(QtWidgets.QWidget):
         self.socket_value = socket_value
 
         self.image_calculator = ImageCalculator()
+        self.image_calculator.setup()
 
         self.tradition_frame = self.findChild(QtWidgets.QFrame, 'tradition_frame_2')
         self.semantic_frame = self.findChild(QtWidgets.QFrame, 'semantic_frame_2')
@@ -31,7 +32,7 @@ class ImageTabWidget(QtWidgets.QWidget):
 
         self.bit_value = self.findChild(QtWidgets.QLabel, 'value_2')
         self.ber_value = self.findChild(QtWidgets.QLabel, 'value_3')
-        self.distant = self.findChild(QtWidgets.QLabel, 'value_4')
+        self.mean_ber_value = self.findChild(QtWidgets.QLabel, 'value_4')
         self.loss_packet_value = self.findChild(QtWidgets.QLabel, 'value_5')
 
         receive_calculate_font = QtGui.QFont()
@@ -44,7 +45,7 @@ class ImageTabWidget(QtWidgets.QWidget):
         self.tc_value.setFont(receive_calculate_font)
         self.bit_value.setFont(receive_calculate_font)
         self.ber_value.setFont(receive_calculate_font)
-        self.distant.setFont(receive_calculate_font)
+        self.mean_ber_value.setFont(receive_calculate_font)
         self.loss_packet_value.setFont(receive_calculate_font)
         self.sc_compress_value.setFont(receive_calculate_font)
         self.tc_compress_value.setFont(receive_calculate_font)
@@ -121,3 +122,6 @@ class ImageTabWidget(QtWidgets.QWidget):
             time_value = self.socket_value.get()
             self.bit_value.setText(f"{time_value['time'] / 1024:.2f} Kbps")
             self.loss_packet_value.setText(f"{value['loss_packet'] * 100:.2f}%")
+            self.ber_value.setText(f"{value['ber_ratio'] * 100:.2f}%")
+            self.mean_ber_value.setText(f"{value['mean_ber_ratio'] * 100:.2f}%")
+

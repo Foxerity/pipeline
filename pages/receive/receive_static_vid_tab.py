@@ -6,22 +6,27 @@ from PIL.ImageQt import ImageQt
 from moviepy.editor import VideoFileClip
 from PyQt5 import uic, QtWidgets, QtGui, QtMultimediaWidgets, QtMultimedia, QtCore
 from PyQt5.QtCore import Qt, QTimer
-
+# from main_utils.processes.receive.utils.calculate_video import compute_true_sematic, compute_sc_fps
 
 class StaticVidTab(QtWidgets.QWidget):
-    def __init__(self, path, vid_obj_queue, rece_vid_queue, static_value_queue):
+    def __init__(self, path, vid_obj_queue, rece_vid_queue, static_value_queue, socket_value):
         super(StaticVidTab, self).__init__(flags=Qt.WindowFlags())
         self.gt_path = r'/home/samaritan/Desktop/videos'
         self.rece_vid_queue = rece_vid_queue
         self.vid_obj_queue = vid_obj_queue
         self.static_value_queue = static_value_queue
+        self.socket_value = socket_value
 
         self.frame_rate = 15
         self.clip = None
         self.frame_count = None
         self.current_frame = 0
-        self.timer = QtCore.QTimer(self)
-        self.timer.timeout.connect(self.display_next_frame)
+
+        self.trad_timer = QtCore.QTimer(self)
+        self.trad_timer.timeout.connect(self.display_next_frame)
+
+        self.sema_timer = QtCore.QTimer(self)
+        self.sema_timer.timeout.connect(self.receive_clicked)
 
         uic.loadUi(path, self)
 
@@ -30,6 +35,14 @@ class StaticVidTab(QtWidgets.QWidget):
         self.receiveButton = self.findChild(QtWidgets.QPushButton, 'receiveButton_4')
         self.comboBox = self.findChild(QtWidgets.QComboBox, 'comboBox_4')
         self.calculateButton = self.findChild(QtWidgets.QPushButton, 'calculateButton_4')
+        self.sc_value = self.findChild(QtWidgets.QLabel, 'static_fidelity_sc_value')
+        self.tc_value = self.findChild(QtWidgets.QLabel, 'static_fidelity_tc_value')
+        self.sc_frame_value = self.findChild(QtWidgets.QLabel, 'static_frame_sc_value')
+        self.tc_frame_value = self.findChild(QtWidgets.QLabel, 'static_frame_tc_value')
+        self.bit_value = self.findChild(QtWidgets.QLabel, 'value_2')
+        self.ber_value = self.findChild(QtWidgets.QLabel, 'value_3')
+        self.mean_ber_value = self.findChild(QtWidgets.QLabel, 'value_4')
+        self.loss_packet_value = self.findChild(QtWidgets.QLabel, 'value_5')
 
         receive_calculate_font = QtGui.QFont()
         receive_calculate_font.setPointSize(14)
@@ -38,6 +51,14 @@ class StaticVidTab(QtWidgets.QWidget):
         self.calculateButton.setFont(receive_calculate_font)
         self.receiveButton.setText('接收')
         self.calculateButton.setText('计算')
+        self.sc_value.setFont(receive_calculate_font)
+        self.tc_value.setFont(receive_calculate_font)
+        self.sc_frame_value.setFont(receive_calculate_font)
+        self.tc_frame_value.setFont(receive_calculate_font)
+        self.bit_value.setFont(receive_calculate_font)
+        self.ber_value.setFont(receive_calculate_font)
+        self.mean_ber_value.setFont(receive_calculate_font)
+        self.loss_packet_value.setFont(receive_calculate_font)
 
         self.choice = {"fish": 1, "two_box": 2, "视频3": 3, "视频4": 4}
         self.comboBox.addItems(self.choice.keys())
@@ -48,7 +69,7 @@ class StaticVidTab(QtWidgets.QWidget):
 
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.emit_calculation)
-        self.timer.start(10)  # 10ms秒触发一次计算
+        self.timer.start(70)  # 10ms秒触发一次计算
 
     def combo_changed(self):
         # 获取当前选中的文本
@@ -60,19 +81,17 @@ class StaticVidTab(QtWidgets.QWidget):
         self.start_playing(current_text)
 
     def receive_clicked(self):
-        print("receive_clicked!!!!")
         if not self.rece_vid_queue.empty():
             img = self.rece_vid_queue.get()
             self.display_single_image(img)
-        QTimer().singleShot(70, lambda: self.receive_clicked())
+        self.sema_timer.start(70)
 
     def start_playing(self, video_path):
         video_path = os.path.join(self.gt_path, video_path + '.mp4')
         self.clip = VideoFileClip(video_path)
         self.frame_count = int(self.clip.duration * self.frame_rate)
         self.current_frame = 0
-        print(1000 / self.frame_rate)
-        self.timer.start(int(1000 / self.frame_rate))
+        self.trad_timer.start(int(1000 / self.frame_rate))
 
     def display_next_frame(self):
         if self.current_frame < self.frame_count:
@@ -80,7 +99,7 @@ class StaticVidTab(QtWidgets.QWidget):
             self.display_image(img)
             self.current_frame += 1
         else:
-            self.timer.stop()
+            self.trad_timer.stop()
 
     def display_image(self, image):
         pixmap = QtGui.QPixmap.fromImage(
@@ -110,7 +129,9 @@ class StaticVidTab(QtWidgets.QWidget):
         pass
 
     def emit_calculation(self):
-        if not self.static_value_queue.empty():
-            value = self.static_value_queue.get()
-            self.bit_value.setText(f"{value['bit_ratio']/1024:.2f} Kbps")
-            self.loss_packet_value.setText(f"{value['loss_packet'] * 100:.2f}%")
+        if not self.socket_value.empty():
+            # value = self.static_value_queue.get()
+            time_value = self.socket_value.get()
+            print(f"speed: {time_value}")
+            self.bit_value.setText(f"{time_value['time']/1024:.2f} Kbps")
+            # self.loss_packet_value.setText(f"{value['loss_packet'] * 100:.2f}%")

@@ -43,7 +43,7 @@ class MainPage(QtWidgets.QMainWindow):
 
         self.tab_widget.addTab(StaticVidTab(self.pages_path[2],
                                             queue_dict['vid_obj_queue'], queue_dict['rec_queue'],
-                                            queue_dict["static_value_queue"]),
+                                            queue_dict["static_value_queue"], queue_dict["socket_value"]),
                                "静态视频")
 
         self.tab_widget.addTab(StreamVidTab(self.pages_path[3],
@@ -194,7 +194,6 @@ class MainWindow(Pipeline):
 
 if __name__ == "__main__":
     import torch
-
     torch.multiprocessing.set_start_method('spawn')
     app = QtWidgets.QApplication(sys.argv)
     main = MainWindow()

@@ -48,6 +48,8 @@ class ImgProcess(Pipeline):
                 image_chunks += b'\x00'
             image_chunks = b'\x24' + b'\x4d' + b'\x53' + image_chunks
             self.img_socket_queue.put(image_chunks)
+            image_chunks = ''.join(format(byte, '08b') for byte in image_chunks)
+            self.write_bits_to_file(image_chunks, r"resources/send/semantic_compress.txt")
 
     def tradition_compress(self, img_path):
         out_dir = 'temp'
@@ -65,4 +67,11 @@ class ImgProcess(Pipeline):
             chunk = b'\x24' + b'\x4d' + b'\x53' + bytes(chunk)
             assert len(chunk) == 1047
             self.img_socket_queue.put(chunk)
+            chunk = ''.join(format(byte, '08b') for byte in chunk)
+            self.write_bits_to_file(chunk, r"resources/send/tradition_compress.txt")
+
+    @staticmethod
+    def write_bits_to_file(bit_stream, file_path):
+        with open(file_path, 'a') as file:
+            file.write(bit_stream)
 
