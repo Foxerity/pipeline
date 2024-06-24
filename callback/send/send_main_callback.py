@@ -8,13 +8,17 @@ class SendMainCallback(Callback):
         super().__init__()
         self.class_name = None
         self.filename = None
+        self.level = None
 
-    def setup(self, class_name, **kwargs):
+    def setup(self, class_name, level=1, **kwargs):
         self.class_name = class_name
+        self.level = level
         date_str = datetime.now().strftime("%m%d")
         self.filename = rf"callback/log/{date_str}.txt"
 
     def init_run(self, modules, queue_dict, **kwargs):
+        if not self.level:
+            return
         modules = [module.__class__.__name__ for module in modules]
         messages = (
                     f"Initialized modules {modules}.",
@@ -23,6 +27,8 @@ class SendMainCallback(Callback):
         self.f_print(messages, self.color['g'])
 
     def before_run(self, module=None):
+        if not self.level:
+            return
         module = module.__class__.__name__
         message = (
                     f"Starting modules {module}.",
@@ -30,6 +36,8 @@ class SendMainCallback(Callback):
         self.f_print(message, self.color['b'])
 
     def after_run(self, module=None):
+        if not self.level:
+            return
         module = module.__class__.__name__
         messages = (
                     f"Started modules {module}.",
