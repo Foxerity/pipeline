@@ -2,10 +2,16 @@ import yaml
 import importlib
 from typing import List, Dict, Any
 from abc import ABC, abstractmethod
-from callback.callback import Callback
+
+from PyQt5 import QtWidgets
 
 
-class Pipeline(ABC):
+# Define the MetaPipeline metaclass
+class MetaPipeline(type(ABC), type(QtWidgets.QWidget)):
+    pass
+
+
+class Pipeline(ABC, metaclass=MetaPipeline):
     """
     1、在Pipeline中，项目所有的模块必须继承自Pipeline以便统一的管理。
     2、在项目流程图中承担项目主要功能的模块被称为主要模块。
@@ -35,7 +41,7 @@ class Pipeline(ABC):
     def setup(self, **kwargs):
         raise NotImplementedError
 
-    def run(self, callbacks: Callback = None, **kwargs):
+    def run(self, callbacks=None, **kwargs):
         """
         :param callbacks:   需要被挂载的Callback列表
         :param kwargs:      参数适配

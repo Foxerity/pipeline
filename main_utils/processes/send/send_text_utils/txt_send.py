@@ -10,9 +10,11 @@ from txt_receive import Receiver
 from preprocess_text import process
 from models.transceiver import DeepSC
 from main_utils.processes.send.send_text_utils.utils import PowerNormalize, split_sentences, list_to_bytes
+from pipeline_abc import Pipeline
+from callback.callback import Callback
 
 
-class Sender:
+class Sender(Pipeline):
     def __init__(self):
         super().__init__()
         self.args = self.parse_arguments()
@@ -31,7 +33,7 @@ class Sender:
         self.deepsc = self.initialize_deepsc()
         self.load_checkpoint()
 
-    def run(self, txt_queue, txt_socket_queue):
+    def run(self, txt_queue=None, txt_socket_queue=None, **kwargs):
         self.setup()
         self.txt_queue = txt_queue
         self.txt_socket_queue = txt_socket_queue
@@ -41,7 +43,7 @@ class Sender:
         # 读出文件夹中所有.txt文件的句子
         process_sentences = process(input_dir)
 
-        send_packet_bit = np.array([len(process_sentences)]*100, dtype="<u2")
+        send_packet_bit = np.array([len(process_sentences)] * 100, dtype="<u2")
         send_packet_bytes = send_packet_bit.tobytes("F")
         self.txt_socket_queue.put(send_packet_bytes)
 
@@ -55,6 +57,7 @@ class Sender:
             self.send_packet_count += 1
             print(f"sending bit_stream {len(bit_stream)}")
             self.write_bits_to_file(bit_stream, "send_bits.txt")
+
     def parse_arguments(self):
         parser = argparse.ArgumentParser(description="Configuration for the Sender model.")
         parser.add_argument('--vocab-file', default=r'/home/samaritan/Desktop/pipeline_final/pipeline/main_utils/processes/send/send_text_utils/europarl/vocab.json',

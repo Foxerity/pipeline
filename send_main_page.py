@@ -14,10 +14,11 @@ from pages.send.send_static_vid_tab import StaticVidTab
 from pages.send.send_stream_vid_tab import StreamVidTab
 
 from main_utils.processes.send.send_processes_control import ProcessesControl
+from callback.send.send_main_callback import SendMainCallback
 
 
 # 主界面
-class MainPage(QtWidgets.QMainWindow):
+class MainPage(QtWidgets.QMainWindow, Pipeline):
     # 子界面的配置文件, 分别对应文本、图像、静态视频、流式视频Tab
     pages_path = [
         "ui/send/send_txt_tab.ui",
@@ -28,6 +29,7 @@ class MainPage(QtWidgets.QMainWindow):
 
     def __init__(self, queue_dict):
         super(MainPage, self).__init__(flags=Qt.WindowFlags())
+        Pipeline.__init__(self)
         self.queue_dict = queue_dict
         # 创建主窗口的 QTabWidget
         self.tab_widget = QtWidgets.QTabWidget()
@@ -59,7 +61,10 @@ class MainPage(QtWidgets.QMainWindow):
                         }
                         """)
 
-    def run(self):
+    def setup(self, **kwargs):
+        pass
+
+    def run(self, **kwargs):
         self.show()
 
     def on_tab_changed(self, index):
@@ -104,6 +109,9 @@ class MainWindow(Pipeline):
 
     def __init__(self):
         super(MainWindow, self).__init__()
+        self.SendMainCallback = None
+        self.ProcessesControl = None
+
         manager = Manager()
         self.control_queue = manager.Queue()                # 控制socket传输哪个队列的数据
 
@@ -121,21 +129,24 @@ class MainWindow(Pipeline):
 
         self.init_queue_dict()                              # 将全部队列管理为字典
 
-        self.main_page = MainPage(self.queue_dict)
-
         self.process_control = ProcessesControl()
 
     def setup(self, **kwargs):
         self.modules = [
-            self.main_page,
-            self.process_control,
+            SendMainCallback(),
+            MainPage(self.queue_dict),
+            ProcessesControl()
         ]
+        self.initialize_modules()
+        self.ProcessesControl.setup(self.queue_dict)
+        self.SendMainCallback.setup(self.__class__.__name__)
+        self.SendMainCallback.init_run(self.modules, self.queue_dict)
 
-        self.process_control.setup(self.queue_dict)
-
-    def run(self, callbacks: Callback = None, **kwargs):
+    def run(self,  **kwargs):
         for module in self.modules:
+            self.SendMainCallback.before_run(module)
             module.run()
+            self.SendMainCallback.after_run(module)
 
     def init_queue_dict(self):
         self.queue_dict['control_queue'] = self.control_queue
@@ -159,5 +170,6 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     main = MainWindow()
     main.setup()
+    main.save_configfile("send_main.yaml")
     main.run()
     sys.exit(app.exec_())
