@@ -35,3 +35,12 @@ class StaticVidProcess(Pipeline):
                 process = multiprocessing.Process(target=receive.main)
                 process.start()
             time.sleep(0.5)
+
+
+if __name__ == '__main__':
+    test_receive = StaticVidProcess()
+    test_q1 = multiprocessing.Queue()
+    test_model_name = "two_box"
+
+    test_receive.setup(test_q1, test_model_name)
+    test_receive.run()
